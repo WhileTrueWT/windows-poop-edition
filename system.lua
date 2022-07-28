@@ -1,7 +1,7 @@
 -- FAIR WARNING: THIS CODE IS FUCKING SHIT!!!
 -- Proceed at own risk!!!!!!!!!
 
-systemVersion = "b2.1"
+systemVersion = "b3.0"
 
 local utf8 = require "utf8"
 local filegui = require "lib.filegui"
