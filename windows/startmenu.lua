@@ -29,9 +29,10 @@ function window.update(dt)
 end
 
 function window.draw()
-    image("images/gradient.png", 0, 0, window.windowWidth, window.windowHeight)
+    image("images/gradient.png", 0, 0, window.windowWidth, window.windowHeight, settings.themeColor)
     
-    image("images/gradient.png", 0, 0, window.windowWidth, 50, {0.6, 0.6, 0.6, 1})
+    image("images/gradient.png", 0, 0, window.windowWidth, 50,
+    {settings.themeColor[1] * 0.6, settings.themeColor[2] * 0.6, settings.themeColor[3] * 0.6, 1})
     image("images/start.png", 0, 0, window.windowWidth, 50)
     
     local by = 60

@@ -7,7 +7,13 @@ local screen = "home"
 
 screens.display = {
     draw = function()
+        text("Background: " .. tostring(settings.background), 5, 5)
         
+        button("Change", function()
+            open(function(_, path)
+                settings.background = path
+            end)
+        end, 5, 20, 100, 30)
     end
 }
 

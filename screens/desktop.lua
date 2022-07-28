@@ -41,7 +41,7 @@ function screen.draw()
     
     image(settings.background, 0, 0, displayWidth, displayHeight)
     filegui.drawFileList(10, 10, displayWidth, displayHeight-50, not (isWindowOpen() or isMessageBoxShowing() or isTextInputShowing()))
-    image("images/gradient.png", 0, displayHeight-taskbarHeight, displayWidth, taskbarHeight)
+    image("images/gradient.png", 0, displayHeight-taskbarHeight, displayWidth, taskbarHeight, settings.themeColor)
     
     button("", function() openWindow("windows/startmenu.lua") end, 0, displayHeight-taskbarHeight, 40, taskbarHeight, "images/logo.png", nil, false)
     
