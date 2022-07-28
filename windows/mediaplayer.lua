@@ -7,6 +7,41 @@ window.windowHeight = 90
 local sound
 local isVideo
 
+local function decodeWPA(s)
+    local sampleCount, sampleRate, bitDepth, channelCount, data = string.match(s, "^(%d+)%s(%d+)%s(%d+)%s(%d+)%s(.+)$")
+    
+    sampleCount = tonumber(sampleCount)
+    if not sampleCount then
+        return nil, "Invalid value for: sample count"
+    end
+    sampleRate = tonumber(sampleRate)
+    if not sampleRate then
+        return nil, "Invalid value for: sample rate"
+    end
+    bitDepth = tonumber(bitDepth)
+    if not bitDepth then
+        return nil, "Invalid value for: bit depth"
+    end
+    channelCount = tonumber(channelCount)
+    if not channelCount then
+        return nil, "Invalid value for: channel count"
+    end
+    
+    if not data then
+        return nil, "No sample data could be determined"
+    end
+    
+    local soundData = love.sound.newSoundData(sampleCount, sampleRate, bitDepth, channelCount)
+    
+    local n, idx = 1
+    for i = 0, sampleCount-1 do
+        n, idx = love.data.unpack("n", data, idx)
+        soundData:setSample(i, n)
+    end
+    
+    return soundData
+end
+
 function window.load(file)
     f = nil
     
@@ -22,6 +57,19 @@ function window.load(file)
             sound = love.graphics.newVideo(f)
             window.windowWidth = sound:getWidth() + 20
             window.windowHeight = sound:getHeight() + 120
+        elseif string.match(string.lower(f), "%.wpa$") then
+            isVideo = false
+            window.windowWidth = 340
+            window.windowHeight = 90
+            
+            local data, err = decodeWPA(love.filesystem.read(f))
+            if not data then
+                messageBox("Error", "Failed to decode .wpa file:\n" .. err, {{"OK", function()
+                    closeMessageBox()
+                    closeWindow()
+                end}}, "sounds/critical.wav")
+            end
+            sound = love.audio.newSource(data)
         else
             isVideo = false
             window.windowWidth = 340

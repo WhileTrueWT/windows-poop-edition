@@ -176,6 +176,8 @@ local function openFile(file)
     elseif ext == "lnk" then
         local data = love.filesystem.read(file)
         openFile(data)
+    elseif ext == "wpa" then
+        openWindow("windows/mediaplayer.lua", file)
     else
         messageBox("Explorer", "Explorer does not know how to open '" .. ext .. "' files", nil, "exc")
     end
@@ -223,7 +225,7 @@ function m.drawFileList(xpos, ypos, w, h, cc, param)
                 local icon
                 if ext == "png" or ext == "jpg" then
                     icon = "images/icons/picture.png"
-                elseif ext == "wav" or ext == "mp3" then
+                elseif ext == "wav" or ext == "mp3" or ext == "wpa" then
                     icon = "images/icons/sound.png"
                 elseif ext == "txt" then
                     icon = "images/icons/text.png"
