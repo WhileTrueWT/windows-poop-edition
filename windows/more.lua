@@ -19,6 +19,7 @@ local items = {
     {"Importer", "images/icons/download.png", function() openWindow("windows/importer.lua") end},
     {"Run", "images/icons/run.png", function() run() end},
     {"Command Prompt", "images/icons/cmd.png", function() openWindow("windows/cmd.lua") end},
+    {"Sound Recorder", "images/icons/soundrecorder.png", function() openWindow("windows/soundrecorder.lua") end},
     {"Vurl IDE", "images/icons/vurl.png", function() openWindow("windows/vurlide.lua") end},
     {"UCanCode", "images/icons/code.png", function() openWindow("windows/ucancode.lua") end},
     {"Soundboard", "images/icons/soundboard.png", function() openWindow("windows/soundboard.lua") end},

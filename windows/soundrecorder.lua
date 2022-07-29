@@ -2,7 +2,7 @@ local window = {}
 window.title = "Sound Recorder"
 window.icon = "images/icons/soundrecorder.png"
 window.windowWidth = 350
-window.windowHeight = 60
+window.windowHeight = 110
 
 local sampleRate = 8000     -- low quality ftw
 local maxLength = 10        -- seconds
@@ -61,6 +61,35 @@ function window.draw()
         rect(50, 40, 240, 15, {0, 0, 0})
         rect(50, 40, 240 * sound:tell() / sound:getDuration(), 15, {0, 0.75, 0})
         text(math.floor(sound:getDuration() * 100) / 100, 300, 40)
+        
+        button("Half Speed", function()
+            local newdata = love.sound.newSoundData(
+                data:getSampleCount() * 2,
+                data:getSampleRate(),
+                data:getBitDepth(),
+                data:getChannelCount()
+            )
+            for i = 0, newdata:getSampleCount() - 1 do
+                newdata:setSample(i, data:getSample(math.floor(i/2)))
+            end
+            
+            data = newdata
+            sound = love.audio.newSource(data)
+        end, 5, 70, 120, 30)
+        button("Double Speed", function()
+            local newdata = love.sound.newSoundData(
+                math.floor(data:getSampleCount() / 2),
+                data:getSampleRate(),
+                data:getBitDepth(),
+                data:getChannelCount()
+            )
+            for i = 0, newdata:getSampleCount() - 1 do
+                newdata:setSample(i, data:getSample(i*2))
+            end
+            
+            data = newdata
+            sound = love.audio.newSource(data)
+        end, 130, 70, 120, 30)
     end
 end
 
