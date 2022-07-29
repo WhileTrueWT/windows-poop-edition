@@ -77,6 +77,11 @@ function window.draw()
             sound = love.audio.newSource(data)
         end, 5, 70, 120, 30)
         button("Double Speed", function()
+            if math.floor(data:getSampleCount() / 2) == 0 then
+                messageBox(window.title, "Cannot double speed any further.")
+                return
+            end
+            
             local newdata = love.sound.newSoundData(
                 math.floor(data:getSampleCount() / 2),
                 data:getSampleRate(),
