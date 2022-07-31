@@ -13,9 +13,12 @@ local line
 local userlist
 local textinput
 local hasStarted
+local isConnecting
 local scroll
 local commands = {}
 local t
+local t1
+local name
 
 local function Message(text, author, params)
     local t = {}
@@ -120,29 +123,46 @@ local function decode(s)
     commands[data[1]](data[2])
 end
 
-local function start(name)
+local connect = coroutine.create(function()
+    t1 = 0
+    while true do
+        local event = client:service()
+        if event and event.type == "connect" then
+            server:send(json.encode{
+                "set_name",
+                {name}
+            })
+            client:flush()
+            hasStarted = true
+            isConnecting = false
+            return
+        elseif event and event.type == "disconnect" then
+            isConnecting = false
+            closeWindow()
+            messageBox("PEChat", "Connection failed. (Disconnected)")
+            return
+        end
+        
+        if t1 >= 30 then
+            isConnecting = false
+            closeWindow()
+            messageBox("PEChat", "Connection failed. (Timed out)")
+            return
+        end
+        
+        coroutine.yield()
+    end
+end)
+
+local function start()
     client = enet.host_create()
     server = client:connect("localhost:8798")
-    local event = client:service(5000)
-    if event and event.type == "connect" then
-        server:send(json.encode{
-            "set_name",
-            {name}
-        })
-        client:flush()
-    elseif event and event.type == "disconnect" then
-        closeWindow()
-        messageBox("PEChat", "Connection failed. (Disconnected)")
-    else
-        closeWindow()
-        messageBox("PEChat", "Connection failed. (Timed out)")
-    end
-    
-    hasStarted = true
+    isConnecting = true
 end
 
 function window.load()
     hasStarted = false
+    isConnecting = false
     scroll = 0
     messages = {}
     line = {}
@@ -150,16 +170,26 @@ function window.load()
     textinput = ""
     
     textInput("Choose a name! (a-zA-Z0-9_, max 32 chars)", function(text)
-        start(text)
+        name = text
+        start()
     end)
     
     t = 0
+    t1 = 0
 end
 
 function window.update(dt)
     t = t + dt
+    t1 = t1 + dt
     
-    if not hasStarted then return end
+    if isConnecting then
+        coroutine.resume(connect)
+        return
+    end
+    
+    if not hasStarted then
+        return
+    end
     
     local event = client:service()
     if event then
@@ -173,6 +203,10 @@ end
 
 function window.draw()
     local f = love.graphics.getFont()
+    
+    if isConnecting then
+        text("Connecting...", 5, 5)
+    end
     
     local y = scroll + windowHeight-60 - #line * 15
     for i, l in ipairs(line) do
