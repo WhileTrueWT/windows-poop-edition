@@ -5,6 +5,8 @@ window.title = "Command Prompt"
 window.icon = "images/icons/cmd.png"
 
 local t
+local cdir
+local scroll
 
 local function command(text)
     local terms = {}
@@ -27,6 +29,13 @@ open [program] (argument?): Opens a program.
 crash: Crash your computer.
 list: List available programs.
 close: Close Command Prompt.
+clear: Clear all text from the screen.
+cd [dir]: Change working directory.
+ls (dir?): List all files and directories in the current directory or a specific directory.
+cat [file]: Print contents of a file.
+mv [src] [dest]: Move/rename a file.
+cp [src] [dest]: Copy a file.
+rm [file]: Delete a file or an empty directory.
 
 Note: To type a space as part of an argument, you must type an underscore (_) instead. If you wanna type an underscore, type \_ instead.]])
         return
@@ -63,6 +72,101 @@ Note: To type a space as part of an argument, you must type an underscore (_) in
     
     if cmd == "close" then
         closeWindow()
+        return
+    end
+    
+    if cmd == "clear" then
+        stdout = ""
+        return
+    end
+    
+    if cmd == "cd" then
+        if not args[1] then
+            print("ERROR: missing argument 1")
+            return
+        end
+        
+        local dir = args[1]
+        if dir == ".." then
+            if cdir ~= ""  then
+                cdir = string.match(cdir, "/?(.+/).+/$") or ""
+            end
+        else
+            cdir = dir .. "/"
+        end
+        return
+    end
+    
+    if cmd == "ls" then
+        local dir = args[1] or cdir
+        if not string.match(dir, "/$") then dir = dir .. "/" end
+        
+        for _, item in ipairs(love.filesystem.getDirectoryItems(dir)) do
+            local info = love.filesystem.getInfo(dir .. item)
+            if info.type == "directory" then
+                item = item .. "/"
+            end
+            
+            print(item)
+        end
+        return
+    end
+    
+    if cmd == "cat" then
+        if not args[1] then
+            print("ERROR: missing argument 1")
+            return
+        end
+        
+        local file = args[1]
+        local s, err = love.filesystem.read(cdir .. file)
+        if not s and err then
+            print("ERROR: " .. err)
+            return
+        end
+        
+        print(s)
+        return
+    end
+    
+    if cmd == "cp" then
+        if not args[1] then
+            print("ERROR: missing argument 1")
+            return
+        end
+        if not args[2] then
+            print("ERROR: missing argument 2")
+            return
+        end
+        
+        local src, dest = args[1], args[2]
+        local content, err = love.filesystem.read(cdir .. src)
+        if not content and err then
+            print("ERROR: ".. err)
+            return
+        end
+        
+        local ok, err = love.filesystem.write(cdir .. dest, content)
+        if not ok and err then
+            print("ERROR: ".. err)
+            return
+        end
+        return
+    end
+    
+    if cmd == "rm" then
+        if not args[1] then
+            print("ERROR: missing argument 1")
+            return
+        end
+        
+        local file = args[1]
+        local ok = love.filesystem.remove(cdir .. file)
+        if not ok then
+            print("ERROR: failed to delete " .. file)
+            return
+        end
+        return
     end
     
     if not cmd then return end
@@ -71,8 +175,10 @@ Note: To type a space as part of an argument, you must type an underscore (_) in
 end
 
 function window.load()
+    cdir = ""
     stdin = ""
     stdout = "CrapOS Windows Poop Edition 5 - " .. systemVersion .."\n\"\"©\"\"2017-2022\n"
+    scroll = 0
     t = 0
 end
 
@@ -85,7 +191,8 @@ function window.keypressed(key)
     end
     
     if key == "return" then
-        print("> " .. stdin)
+        scroll = 0
+        print(cdir .. "> " .. stdin)
         command(stdin)
         stdin = ""
     end
@@ -93,6 +200,10 @@ end
 
 function window.textinput(text)
     stdin = stdin .. text
+end
+
+function window.wheelmoved(dx, dy)
+    scroll = scroll + dy
 end
 
 function window.update(dt)
@@ -110,11 +221,16 @@ function window.draw()
     end
     
     local f = love.graphics.getFont()
-    local s = stdout .. "> " .. stdin
+    local s = stdout .. cdir .. "> " .. stdin
     local _, lines = f:getWrap(s, windowWidth)
     local pos = #lines <= math.floor(windowHeight / f:getHeight()) and 0 or 0 - #lines * f:getHeight() + windowHeight
     
+    love.graphics.push()
+    love.graphics.translate(0, scroll * f:getHeight())
+    
     text(s .. textCursor, 0, pos, {1, 1, 1}, windowWidth)
+    
+    love.graphics.pop()
 end
 
 return window
