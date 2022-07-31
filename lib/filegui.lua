@@ -91,14 +91,14 @@ local tooltipOptions = {
     {"Paste", function(file)
         local clipboard = paste()
         if clipboard[1] == "file" then
-            local name = string.match(clipboard[2], "([^/]+)%.?$")
+            local name = string.match(clipboard[2], "([^/%.]+)%.?%w*$")
             local ext = string.match(clipboard[2], "(%.%w+)$") or ""
-            local newName
+            local newName = name .. ext
             local n = 1
-            repeat
+            while love.filesystem.getInfo(cdir .. newName) do
                 newName = name .. ' (' .. tostring(n) .. ')' .. ext
                 n = n + 1
-            until not love.filesystem.getInfo(cdir .. newName)
+            end
             
             local src, dest = clipboard[2], cdir .. newName
             local data, err = love.filesystem.read(src)
