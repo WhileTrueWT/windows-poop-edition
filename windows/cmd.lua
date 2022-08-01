@@ -36,8 +36,10 @@ cat [file]: Print contents of a file.
 mv [src] [dest]: Move/rename a file.
 cp [src] [dest]: Copy a file.
 rm [file]: Delete a file or an empty directory.
+lua [code]: Execute a line of Lua code.
 
-Note: To type a space as part of an argument, you must type an underscore (_) instead. If you wanna type an underscore, type \_ instead.]])
+Note: To type a space as part of an argument, you must type an underscore (_) instead. If you wanna type an underscore, type \_ instead.
+(this is not required for the 'lua' command)]])
         return
     end
     
@@ -166,6 +168,28 @@ Note: To type a space as part of an argument, you must type an underscore (_) in
             print("ERROR: failed to delete " .. file)
             return
         end
+        return
+    end
+    
+    if cmd == "lua" then
+        local s = ""
+        for _, arg in ipairs(args) do
+            s = s .. arg .. " "
+        end
+        
+        local chunk, err = loadstring(s)
+        if not chunk then
+            print(err)
+            return
+        end
+        
+        local ok, ret = pcall(chunk)
+        if not ok then
+            print(ret)
+            return
+        end
+        
+        print(ret)
         return
     end
     
