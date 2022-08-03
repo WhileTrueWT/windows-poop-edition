@@ -6,6 +6,8 @@ window.windowHeight = 90
 
 local sound
 local isVideo
+local videoWidth
+local videoHeight
 
 local function decodeWPA(s)
     local sampleCount, sampleRate, bitDepth, channelCount, data = string.match(s, "^(%d+)%s(%d+)%s(%d+)%s(%d+)%s(.+)$")
@@ -55,8 +57,10 @@ function window.load(file)
         if string.match(string.lower(f), "%.ogg$") then
             isVideo = true
             sound = love.graphics.newVideo(f)
-            window.windowWidth = sound:getWidth() + 20
-            window.windowHeight = sound:getHeight() + 120
+            videoHeight = math.min(sound:getHeight(), displayHeight - 180)
+            videoWidth = videoHeight * (sound:getWidth()/sound:getHeight())
+            window.windowWidth = videoWidth + 20
+            window.windowHeight = videoHeight + 120
         elseif string.match(string.lower(f), "%.wpa$") then
             isVideo = false
             window.windowWidth = 340
@@ -88,8 +92,8 @@ function window.draw()
     local dur = (isVideo and (sound:getSource():getDuration() or 100) or sound:getDuration())
     if isVideo then
         love.graphics.setColor(1,1,1,1)
-        love.graphics.draw(sound, 5, 20)
-        love.graphics.translate(0, sound:getHeight() + 30)
+        love.graphics.draw(sound, 5, 20, nil, videoWidth/sound:getWidth(), videoHeight/sound:getHeight())
+        love.graphics.translate(0, videoHeight + 30)
     end
     text(math.floor(sound:tell()), 0, 15)
     rect(50, 15, windowWidth-100, 15, {0, 0, 0})
