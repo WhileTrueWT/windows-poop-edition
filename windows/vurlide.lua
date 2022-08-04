@@ -11,6 +11,7 @@ local t1
 local f
 local cursorPos
 local preview
+local dir = ""
 
 local defaultText = [[define load
     # when program loads
@@ -28,6 +29,7 @@ end]]
 local textAreaWidth = 400
 
 local function drawPreview()
+    vurl.setroot(dir)
     local ok = pcall(vurl.run, txt)
     if not ok then
         love.graphics.setCanvas()
@@ -61,6 +63,7 @@ function window.load(file)
     if file then open(function(text, name)
         txt = text
         f = file
+        dir = string.match(file, "^(.*/).*$") or "/"
         window.title = "Vurl IDE - " .. file
     end, file) else txt = defaultText end
     
@@ -158,6 +161,7 @@ function window.draw()
     button("Open", function() open(function(content, name)
         txt = content
         f = name
+        dir = string.match(name, "^(.*/).*$") or "/"
         window.title = "Vurl IDE - " .. f
     end) end, ex, 0, 60, 30)
     ex = ex + 60

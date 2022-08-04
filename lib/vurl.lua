@@ -13,6 +13,7 @@ local elements = {}
 local commands = {}
 local callFunc
 local window = {}
+local root = ""
 
 commands = {
     set = function(a)
@@ -25,23 +26,48 @@ commands = {
     list = function(a)
         return a
     end,
+    -- I upset myself
     insert = function(a)
-        table.insert(a[1], a[2], a[3])
+        if string.match(a[1], "^%.") and #returnStack > 0 then
+            table.insert(returnStack[#returnStack].locals[a[1]], a[2], a[3])
+        else
+            table.insert(mem[a[1]], a[2], a[3])
+        end
     end,
     push = function(a)
-        table.insert(a[1], a[2])
+        if string.match(a[1], "^%.") and #returnStack > 0 then
+            table.insert(returnStack[#returnStack].locals[a[1]], a[2])
+        else
+            table.insert(mem[a[1]], a[2])
+        end
     end,
     remove = function(a)
-        return table.remove(a[1], a[2]) or ""
+        if string.match(a[1], "^%.") and #returnStack > 0 then
+            return table.remove(returnStack[#returnStack].locals[a[1]], a[2]) or ""
+        else
+            return table.remove(mem[a[1]], a[2]) or ""
+        end
     end,
     pop = function(a)
-        return table.remove(a[1]) or ""
+        if string.match(a[1], "^%.") and #returnStack > 0 then
+            return table.remove(returnStack[#returnStack].locals[a[1]]) or ""
+        else
+            return table.remove(mem[a[1]]) or ""
+        end
     end,
     index = function(a)
-        return a[1][tonumber(a[2])] or ""
+        if string.match(a[1], "^%.") and #returnStack > 0 then
+            return returnStack[#returnStack].locals[a[1]][tonumber(a[2])] or ""
+        else
+            return mem[a[1]][tonumber(a[2])] or ""
+        end
     end,
     replace = function(a)
-        a[1][tonumber(a[2])] = a[3]
+        if string.match(a[1], "^%.") and #returnStack > 0 then
+            returnStack[#returnStack].locals[a[1]][tonumber(a[2])] = a[3]
+        else
+            mem[a[1]][tonumber(a[2])] = a[3]
+        end
     end,
     
     add = function(a)
@@ -183,11 +209,11 @@ commands = {
     end,
     
     image = function(a)
-        image(a[1], tonumber(a[2]), tonumber(a[3]), tonumber(a[4]), tonumber(a[5]))
+        image(root .. a[1], tonumber(a[2]), tonumber(a[3]), tonumber(a[4]), tonumber(a[5]))
     end,
     
     sound = function(a)
-        sound(a[1])
+        sound(root .. a[1])
     end,
     
     textinput = function(a)
@@ -340,6 +366,13 @@ local m = {}
 
 m.run = run
 m.callFunc = callFunc
+
+function m.setroot(dir)
+    if not string.match(dir, "/$") then
+        dir = dir .. "/"
+    end
+    root = dir
+end
 
 function m.setvar(var, val)
     mem[var] = val

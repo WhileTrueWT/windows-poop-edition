@@ -5,8 +5,10 @@ local vurl = love.filesystem.load("lib/vurl.lua")()
 window = {}
 window.title = "Vurl Program"
 
+local root = "/"
+
 vurl.setcmd("icon", function(a)
-    window.icon = a[1]
+    window.icon = root .. a[1]
 end)
     
 vurl.setcmd("title", function(a)
@@ -18,6 +20,9 @@ function window.load(arg)
         code = love.filesystem.read(arg)
         elements = {}
         t = 0
+        
+        root = string.match(arg, "^(.*/).*$") or "/"
+        vurl.setroot(root)
         
         vurl.run(code)
         hasStarted = true
