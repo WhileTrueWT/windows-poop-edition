@@ -6,6 +6,9 @@ window = {}
 window.title = "Vurl Program"
 
 local root = "/"
+local code
+local t
+local hasStarted = false
 
 vurl.setcmd("icon", function(a)
     window.icon = root .. a[1]
@@ -18,7 +21,6 @@ end)
 function window.load(arg)
     if arg then
         code = love.filesystem.read(arg)
-        elements = {}
         t = 0
         
         root = string.match(arg, "^(.*/).*$") or "/"

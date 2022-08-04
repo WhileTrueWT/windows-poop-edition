@@ -5,11 +5,8 @@ local branches
 local returnStack
 local run
 local co
-local t = 0
 local screen
-local hasStarted = false
 local color
-local elements = {}
 local commands = {}
 local callFunc
 local window = {}
