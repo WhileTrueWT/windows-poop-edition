@@ -170,6 +170,10 @@ function openWindow(id, arg)
         end
     end
     
+    if currentWindow then
+        windows[currentWindow].isActive = false
+    end
+    
     currentMessageBox = nil
     currentWindow = id
     currentTextInputBox = nil
