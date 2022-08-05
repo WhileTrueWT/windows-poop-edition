@@ -254,10 +254,10 @@ function window.textinput(text)
 end
 
 function window.wheelmoved(x, y)
-    scroll = scroll + y*5
+    scroll = scroll + y*30
     
     if scroll < 0 or scroll > (#line * 15)-30 then
-        scroll = scroll - y*5
+        scroll = scroll - y*30
     end
 end
 
