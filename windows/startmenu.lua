@@ -42,8 +42,19 @@ function window.draw()
         by = by + 45
     end
     
-    button("Restart", function() messageBox(nil, "Generic Restart Confirmation", {{"Yes", function() switchScreen("screens/shutdown.lua", "restart") end}, {"No", function() closeMessageBox() end}}, "exc") end, 80, menuHeight - 70, menuWidth-90, 30, {0.8, 0.8, 0})
-    button("Shutdown", function() messageBox(nil, "Generic Shutdown Confirmation", {{"Yes", function() switchScreen("screens/shutdown.lua") end}, {"No", function() closeMessageBox() end}}, "exc") end, 80, menuHeight - 35, menuWidth-90, 30, {0.8, 0, 0}, {1, 1, 1})
+    button("Restart", function()
+        messageBox(nil, "Generic Restart Confirmation", {
+            {"Yes", function() shutdown(true) end},
+            {"No", function() closeMessageBox() end}
+        }, "exc")
+    end, 80, menuHeight - 70, menuWidth-90, 30, {0.8, 0.8, 0})
+    
+    button("Shutdown", function()
+        messageBox(nil, "Generic Shutdown Confirmation", {
+            {"Yes", function() shutdown() end},
+            {"No", function() closeMessageBox() end}
+        }, "exc")
+    end, 80, menuHeight - 35, menuWidth-90, 30, {0.8, 0, 0}, {1, 1, 1})
 end
 
 return window

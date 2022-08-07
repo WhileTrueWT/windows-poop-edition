@@ -156,6 +156,7 @@ end)
 
 local function start()
     client = enet.host_create()
+    -- server = client:connect("localhost:8798")
     server = client:connect("alt.mondecitronne.com:8798")
     isConnecting = true
 end

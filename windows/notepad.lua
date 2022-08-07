@@ -129,7 +129,7 @@ function window.draw()
     love.graphics.setScissor()
 end
 
-function window.quit()
+function window.close()
     love.keyboard.setKeyRepeat(false)
 end
 

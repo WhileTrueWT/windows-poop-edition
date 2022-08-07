@@ -188,7 +188,7 @@ function openWindow(id, arg)
         if windows[currentWindow].load then
             local ok, msg = pcall(windows[currentWindow].load, arg)
             if not ok then
-                closeWindow()
+                closeWindow(nil, true)
                 messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
             end
         end
@@ -202,12 +202,14 @@ function openWindow(id, arg)
     windowY = windows[currentWindow].windowY or displayHeight / 2 - windowHeight / 2
 end
 
-function closeWindow(id)
+function closeWindow(id, force)
     id = id or currentWindow
     
     if windows[id] and windows[id].close then
         local status = windows[id].close()
-        if status then return end
+        if status and not force then
+            return status
+        end
     end
     
     for i, w in ipairs(openWindows) do
@@ -306,6 +308,31 @@ function save(dest, content, ext, onfinish)
     end
 end
 
+function shutdown(restart)
+    local refusingWindows = {}
+    for _, window in ipairs(openWindows) do
+        local status = closeWindow(window)
+        if status then
+            table.insert(refusingWindows, window)
+        end
+    end
+    
+    if #refusingWindows > 0 then
+        messageBox(nil, "The following programs are preventing Windows from shutting down, because they are being stubborn and refusing to close:\n" .. table.concat(refusingWindows, ", ") .. "\n\nYou can either go and deal with these whiny programs, or force them to shutdown anyways.", {
+            {"OK", function() closeMessageBox() end},
+            {"Force Quit", function()
+                for _, window in ipairs(refusingWindows) do
+                    closeWindow(window, true)
+                end
+                switchScreen("screens/shutdown.lua", restart and "restart")
+            end}
+        })
+        return
+    end
+    
+    switchScreen("screens/shutdown.lua", restart and "restart")
+end
+
 function copy(type, data)
     clipboard = {type, data}
 end
@@ -348,7 +375,7 @@ end
 local function call(func, ...)
     local ok, msg = pcall(func, ...)
     if not ok then
-        closeWindow()
+        closeWindow(nil, true)
         messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}}, "critical")
     end
 end
@@ -523,11 +550,11 @@ function importWindow(file)
     local ok, chunk, result
     ok, chunk = pcall(love.filesystem.load, file)
     if not ok then
-        windows[file] = {load = function() messageBox("Program Error", chunk, {{"OK", function() closeMessageBox() closeWindow() end}}, "critical") end}
+        windows[file] = {load = function() messageBox("Program Error", chunk, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
     else
         ok, result = pcall(chunk)
         if not ok then
-            windows[file] = {load = function() messageBox("Program Error", result, {{"OK", function() closeMessageBox() closeWindow() end}}, "critical") end}
+            windows[file] = {load = function() messageBox("Program Error", result, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
         elseif type(result) == "table" then
             windows[file] = result
         else
