@@ -11,6 +11,14 @@ screens.display = {
         
         button("Change", function()
             open(function(_, path)
+                local ok, msg = pcall(love.image.newImageData, path)
+                if not ok then
+                    messageBox(window.title,
+                    string.format("%s is not an image file or does not use a recognizable image format.\n\n%s", path, msg),
+                    nil, "exc")
+                    return
+                end
+                
                 settings.background = path
             end)
         end, 5, 20, 100, 30)
@@ -29,8 +37,6 @@ function window.draw()
         text("Choose an item:", 5, 5)
         
         button("Display", function() screen = "display" end, 5, 30, 160, 30)
-        
-        text("NOTE: Currently this program does not work at all.", 5, 100)
     else
         screens[screen].draw()
     end
