@@ -1,5 +1,6 @@
 local window = {}
 window.title = "Calculator"
+window.icon = "images/icons/calc.png"
 window.windowWidth = 210
 window.windowHeight = 350
 
