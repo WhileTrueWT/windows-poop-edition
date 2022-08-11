@@ -56,7 +56,7 @@ style.taskbar.startButtonColor = {0, 0.75, 0}
 
 style.windowBar = {}
 style.windowBar.color = "images/gradient.png"
-style.windowBar.closeButtonColor = {0.75, 0, 0}
+style.windowBar.closeButtonColor = "images/closebutton.png"
 
 style.window = {}
 style.window.backgroundColor = {0.95, 0.95, 0.95}
@@ -162,71 +162,63 @@ function switchScreen(id, arg)
 end
 
 function openWindow(id, arg)
-    if not windows[id] then 
-        local err = importWindow(id)
-        if err then
-            messageBox("Error", err, nil, "critical")
-            return err
-        end
+    local window, err = importWindow(id)
+    if err then
+        messageBox("Error", err, nil, "critical")
+        return err
     end
     
     if currentWindow then
-        windows[currentWindow].isActive = false
+        openWindows[currentWindow].isActive = false
     end
     
     currentMessageBox = nil
-    currentWindow = id
     currentTextInputBox = nil
-    windows[currentWindow].isActive = true
+    window.isActive = true
+    window.file = id
     
-    local check = false
-    for _, w in ipairs(openWindows) do
-        if w == id then check = true break end
-    end
-    if not check then
-        table.insert(openWindows, id)
-        if windows[currentWindow].load then
-            local ok, msg = pcall(windows[currentWindow].load, arg)
-            if not ok then
-                closeWindow(nil, true)
-                messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
-            end
+    table.insert(openWindows, window)
+    showWindow(#openWindows)
+    if openWindows[currentWindow].load then
+        local ok, msg = pcall(openWindows[currentWindow].load, arg)
+        if not ok then
+            closeWindow(nil, true)
+            messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
         end
-   end
-   
-    if not windows[currentWindow] then return end
-   
-    windowWidth = windows[currentWindow].windowWidth or 720
-    windowHeight = windows[currentWindow].windowHeight or 480
-    windowX = windows[currentWindow].windowX or displayWidth / 2 - windowWidth / 2
-    windowY = windows[currentWindow].windowY or displayHeight / 2 - windowHeight / 2
+    end
 end
 
 function closeWindow(id, force)
     id = id or currentWindow
     
-    if windows[id] and windows[id].close then
-        local status = windows[id].close()
+    if openWindows[id] and openWindows[id].close then
+        local status = openWindows[id].close()
         if status and not force then
             return status
         end
     end
     
-    for i, w in ipairs(openWindows) do
-        if w == id then table.remove(openWindows, i) break end
-    end
+    table.remove(openWindows, id)
     
     currentWindow = nil
     currentMessageBox = nil
     currentTextInputBox = nil
-    
-    if id then windows[id] = nil end
+end
+
+function showWindow(id)
+    currentWindow = id
+    if not openWindows[currentWindow] then return end
+   
+    windowWidth = openWindows[currentWindow].windowWidth or 720
+    windowHeight = openWindows[currentWindow].windowHeight or 480
+    windowX = openWindows[currentWindow].windowX or displayWidth / 2 - windowWidth / 2
+    windowY = openWindows[currentWindow].windowY or displayHeight / 2 - windowHeight / 2
 end
 
 function hideWindow()
     if currentWindow == nil then return end
     
-    windows[currentWindow].isActive = false
+    openWindows[currentWindow].isActive = false
     currentWindow = nil
 end
 
@@ -310,19 +302,23 @@ end
 
 function shutdown(restart)
     local refusingWindows = {}
-    for _, window in ipairs(openWindows) do
-        local status = closeWindow(window)
+    for id, window in ipairs(openWindows) do
+        local status = closeWindow(id)
         if status then
-            table.insert(refusingWindows, window)
+            table.insert(refusingWindows, {id=id, window=window})
         end
     end
     
     if #refusingWindows > 0 then
-        messageBox(nil, "The following programs are preventing Windows from shutting down, because they are being stubborn and refusing to close:\n" .. table.concat(refusingWindows, ", ") .. "\n\nYou can either go and deal with these whiny programs, or force them to shutdown anyways.", {
+        local s = ""
+        for i, w in ipairs(refusingWindows) do
+            s = s .. (w.window and w.window.title or w.window.file or "???") .. (i < #refusingWindows and ", " or "")
+        end
+        messageBox(nil, "The following programs are preventing Windows from shutting down, because they are being stubborn and refusing to close:\n" .. s .. "\n\nYou can either go and deal with these whiny programs, or force them to shutdown anyways.", {
             {"OK", function() closeMessageBox() end},
             {"Force Quit", function()
-                for _, window in ipairs(refusingWindows) do
-                    closeWindow(window, true)
+                for _, w in ipairs(refusingWindows) do
+                    closeWindow(w.id, true)
                 end
                 switchScreen("screens/shutdown.lua", restart and "restart")
             end}
@@ -543,24 +539,26 @@ end
 -- similar to screens, but they display on top of the current screen
 
 function importWindow(file)
-    if windows[file] then return end
+    local window = {}
     
     if not love.filesystem.getInfo(file) then return "ERROR: file '" .. tostring(file) .. "' does not exist"  end
     
     local ok, chunk, result
     ok, chunk = pcall(love.filesystem.load, file)
     if not ok then
-        windows[file] = {load = function() messageBox("Program Error", chunk, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
+        window = {load = function() messageBox("Program Error", chunk, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
     else
         ok, result = pcall(chunk)
         if not ok then
-            windows[file] = {load = function() messageBox("Program Error", result, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
+            window = {load = function() messageBox("Program Error", result, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
         elseif type(result) == "table" then
-            windows[file] = result
+            window = result
         else
-            return "ERROR: " .. tostring(file) .. " is not a valid CrapOS application. (file did not return table)"
+            return nil, "ERROR: " .. tostring(file) .. " is not a valid CrapOS application. (file did not return table)"
         end
     end
+    
+    return window
 end
 
 -- window decoration
@@ -576,7 +574,7 @@ function windowDec(title)
     text(title, 5, -15 - f:getHeight()/2, {1, 1, 1})
     
     -- close button
-    button("", function() closeWindow() end, windowWidth - 30, -30, 30, 30, "images/closebutton.png", nil, false)
+    button("", function() closeWindow() end, windowWidth - 30, -30, 30, 30, style.windowBar.closeButtonColor, nil, false)
 end
 
 -- MESSAGE BOX
@@ -728,28 +726,28 @@ function callbacks.load()
 end
 
 function callbacks.mousepressed(x, y, button)
-    if windows[currentWindow] and windows[currentWindow].mousepressed then
-        call(windows[currentWindow].mousepressed, x, y, button)
+    if openWindows[currentWindow] and openWindows[currentWindow].mousepressed then
+        call(openWindows[currentWindow].mousepressed, x, y, button)
     end
 end
 
 function callbacks.mousereleased(x, y, button)
-    if windows[currentWindow] and windows[currentWindow].mousereleased then
-        call(windows[currentWindow].mousereleased, x, y, button)
+    if openWindows[currentWindow] and openWindows[currentWindow].mousereleased then
+        call(openWindows[currentWindow].mousereleased, x, y, button)
     end
     canClick = true
 end
 
 function callbacks.mousemoved(x, y, dx, dy)
-    if windows[currentWindow] and windows[currentWindow].mousemoved then
-        call(windows[currentWindow].mousemoved, x, y, dx, dy)
+    if openWindows[currentWindow] and openWindows[currentWindow].mousemoved then
+        call(openWindows[currentWindow].mousemoved, x, y, dx, dy)
     end
 end
 
 function callbacks.wheelmoved(x, y)
     if filegui then filegui.wheelmoved(x, y) end
-    if windows[currentWindow] and windows[currentWindow].wheelmoved then
-        call(windows[currentWindow].wheelmoved, x, y)
+    if openWindows[currentWindow] and openWindows[currentWindow].wheelmoved then
+        call(openWindows[currentWindow].wheelmoved, x, y)
     end
 end
 
@@ -777,22 +775,22 @@ function callbacks.keypressed(key)
             end
             currentTextInputBox = nil
         end
-    elseif windows[currentWindow] and windows[currentWindow].keypressed then
-        call(windows[currentWindow].keypressed, key)
+    elseif openWindows[currentWindow] and openWindows[currentWindow].keypressed then
+        call(openWindows[currentWindow].keypressed, key)
     end
 end
 
 function callbacks.textinput(text)
     if currentTextInputBox then
         currentTextInputBox.input = currentTextInputBox.input .. text
-    elseif windows[currentWindow] and windows[currentWindow].textinput then
-        windows[currentWindow].textinput(text)
+    elseif openWindows[currentWindow] and openWindows[currentWindow].textinput then
+        openWindows[currentWindow].textinput(text)
     end
 end
 
 function callbacks.filedropped(file)
-    if windows[currentWindow] and windows[currentWindow].filedropped then
-        call(windows[currentWindow].filedropped, file)
+    if openWindows[currentWindow] and openWindows[currentWindow].filedropped then
+        call(openWindows[currentWindow].filedropped, file)
     end
 end
 
@@ -802,8 +800,8 @@ function callbacks.update(dt)
         callScreen(screens[currentScreen].update, dt)
     end
     for _, w in ipairs(openWindows) do
-        if windows[w].update then
-            call(windows[w].update, dt)
+        if w.update then
+            call(w.update, dt)
         end
     end
 end
@@ -818,16 +816,16 @@ function callbacks.draw()
     end
     
     love.graphics.translate(windowX, windowY)
-    if windows[currentWindow] then
-        if not windows[currentWindow].hideWindowDec then windowDec(windows[currentWindow].title) end
+    if openWindows[currentWindow] then
+        if not openWindows[currentWindow].hideWindowDec then windowDec(openWindows[currentWindow].title) end
         love.graphics.setScissor(windowX, windowY, windowWidth, windowHeight)
         
-        if windows[currentWindow] and windows[currentWindow].draw then
+        if openWindows[currentWindow] and openWindows[currentWindow].draw then
             if canClick and currentMessageBox or currentTextInputBox then
                 prevCc = canClick
                 canClick, cc = false, false
             end
-            call(windows[currentWindow].draw)
+            call(openWindows[currentWindow].draw)
         end
         
         love.graphics.setScissor()

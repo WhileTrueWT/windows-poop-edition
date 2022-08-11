@@ -37,7 +37,10 @@ function window.draw()
     
     local by = 60
     for i, item in ipairs(items) do
-        button(item[1], item[3], 5, by, menuWidth-10, 40)
+        button(item[1], function()
+            closeWindow()
+            item[3]()
+        end, 5, by, menuWidth-10, 40)
         image(item[2], 8, by+3, 35, 35)
         by = by + 45
     end

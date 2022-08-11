@@ -46,12 +46,12 @@ function screen.draw()
     button("", function() openWindow("windows/startmenu.lua") end, 0, displayHeight-taskbarHeight, 40, taskbarHeight, "images/logo.png", nil, false)
     
     local ex = 50
-    for _, w in ipairs(openWindows) do
-        if w ~= "windows/startmenu.lua" then
-            local title = windows[w].title or ""
+    for id, w in ipairs(openWindows) do
+        if w.file ~= "windows/startmenu.lua" then
+            local title = w.title or ""
             local width = math.max(f:getWidth(title) + 50, 180)
-            button(title, function() openWindow(w) end, ex, displayHeight-40, width, 40, nil, {1, 1, 1, 1}, nil, {0.4, 0.6, 1})
-            image(windows[w].icon or "images/icons/app.png", ex+5, displayHeight-30, 20, 20)
+            button(title, function() showWindow(id) end, ex, displayHeight-40, width, 40, nil, {1, 1, 1, 1}, nil, {0.4, 0.6, 1})
+            image(w.icon or "images/icons/app.png", ex+5, displayHeight-30, 20, 20)
             ex = ex + width
         end
     end

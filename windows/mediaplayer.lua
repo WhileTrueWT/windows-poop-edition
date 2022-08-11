@@ -4,6 +4,7 @@ window.icon = "images/icons/speaker.png"
 window.windowWidth = 340
 window.windowHeight = 90
 
+local f
 local sound
 local isVideo
 local videoWidth
