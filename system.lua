@@ -24,6 +24,8 @@ openWindows = {}
 
 windowX, windowY, windowWidth, windowHeight = 0, 0, 0, 0
 
+local isDragging = false
+
 stdin = ""
 stdout = ""
 
@@ -56,7 +58,9 @@ style.taskbar.startButtonColor = {0, 0.75, 0}
 
 style.windowBar = {}
 style.windowBar.color = "images/gradient.png"
+style.windowBar.inactiveColor = "images/button.png"
 style.windowBar.closeButtonColor = "images/closebutton.png"
+style.windowBar.minimizeButtonColor = "images/minimizebutton.png"
 
 style.window = {}
 style.window.backgroundColor = {0.95, 0.95, 0.95}
@@ -168,12 +172,9 @@ function openWindow(id, arg)
         return err
     end
     
-    if currentWindow then
-        openWindows[currentWindow].isActive = false
-    end
-    
     currentMessageBox = nil
     currentTextInputBox = nil
+    isDragging = false
     window.isActive = true
     window.file = id
     
@@ -200,7 +201,12 @@ function closeWindow(id, force)
     
     table.remove(openWindows, id)
     
-    currentWindow = nil
+    if #openWindows > 0 then
+        currentWindow = #openWindows
+    else
+        currentWindow = nil
+    end
+    
     currentMessageBox = nil
     currentTextInputBox = nil
 end
@@ -208,18 +214,24 @@ end
 function showWindow(id)
     currentWindow = id
     if not openWindows[currentWindow] then return end
-   
-    windowWidth = openWindows[currentWindow].windowWidth or 720
-    windowHeight = openWindows[currentWindow].windowHeight or 480
-    windowX = openWindows[currentWindow].windowX or displayWidth / 2 - windowWidth / 2
-    windowY = openWindows[currentWindow].windowY or displayHeight / 2 - windowHeight / 2
+    local window = openWindows[currentWindow]   
+       
+    window.isActive = true
+    window.windowWidth = window.windowWidth or 720
+    window.windowHeight = window.windowHeight or 480
+    window.windowX = window.windowX or (displayWidth / 2 - window.windowWidth / 2) + (id-1) * 40
+    window.windowY = window.windowY or (displayHeight / 2 - window.windowHeight / 2) + (id-1) * 40
 end
 
 function hideWindow()
     if currentWindow == nil then return end
     
     openWindows[currentWindow].isActive = false
-    currentWindow = nil
+    if currentWindow > 1 then
+        currentWindow = currentWindow - 1
+    else
+        currentWindow = nil
+    end
 end
 
 function isWindowOpen()
@@ -563,18 +575,22 @@ end
 
 -- window decoration
 
-function windowDec(title)
-    title = title or "Window"    
+function windowDec(window, id)
+    title = window.title or "Window"    
     
-    rect(0, 0, windowWidth, windowHeight, style.window.backgroundColor)
-    image(style.windowBar.color, 0, -30, windowWidth, 30, settings.themeColor)
+    rect(0, 0, window.windowWidth, window.windowHeight, style.window.backgroundColor)
+    image((id == currentWindow) and style.windowBar.color or style.windowBar.inactiveColor, 0, -30, window.windowWidth, 30, settings.themeColor)
+    outline(0, -30, window.windowWidth, window.windowHeight + 30)
     
     -- window title
     local f = love.graphics.getFont()
     text(title, 5, -15 - f:getHeight()/2, {1, 1, 1})
     
+    -- minimize button
+    button("", function() hideWindow() end, window.windowWidth - 60, -30, 30, 30, style.windowBar.minimizeButtonColor, nil, false)
+    
     -- close button
-    button("", function() closeWindow() end, windowWidth - 30, -30, 30, 30, style.windowBar.closeButtonColor, nil, false)
+    button("", function() closeWindow() end, window.windowWidth - 30, -30, 30, 30, style.windowBar.closeButtonColor, nil, false)
 end
 
 -- MESSAGE BOX
@@ -726,6 +742,23 @@ function callbacks.load()
 end
 
 function callbacks.mousepressed(x, y, button)
+    for id = #openWindows, 1, -1 do
+        local window = openWindows[id]
+        
+        
+        if x >= window.windowX and x <= window.windowX + window.windowWidth
+        and y >= window.windowY-30 and y <= window.windowY then
+            if currentWindow ~= id then
+                currentWindow = id
+            end
+            
+            if not window.hideWindowDec then
+                isDragging = true
+            end
+            break
+        end
+    end
+    
     if openWindows[currentWindow] and openWindows[currentWindow].mousepressed then
         call(openWindows[currentWindow].mousepressed, x, y, button)
     end
@@ -736,11 +769,23 @@ function callbacks.mousereleased(x, y, button)
         call(openWindows[currentWindow].mousereleased, x, y, button)
     end
     canClick = true
+    isDragging = false
 end
 
 function callbacks.mousemoved(x, y, dx, dy)
-    if openWindows[currentWindow] and openWindows[currentWindow].mousemoved then
-        call(openWindows[currentWindow].mousemoved, x, y, dx, dy)
+    if openWindows[currentWindow] then
+        if isDragging then
+            openWindows[currentWindow].windowX = openWindows[currentWindow].windowX + dx
+            openWindows[currentWindow].windowY = openWindows[currentWindow].windowY + dy
+            
+            if openWindows[currentWindow].windowY > displayHeight - 40 then
+                openWindows[currentWindow].windowY = openWindows[currentWindow].windowY - dy
+            end
+        end
+        
+        if openWindows[currentWindow].mousemoved then
+            call(openWindows[currentWindow].mousemoved, x, y, dx, dy)
+        end
     end
 end
 
@@ -815,24 +860,47 @@ function callbacks.draw()
         callScreen(screens[currentScreen].draw)
     end
     
-    love.graphics.translate(windowX, windowY)
-    if openWindows[currentWindow] then
-        if not openWindows[currentWindow].hideWindowDec then windowDec(openWindows[currentWindow].title) end
-        love.graphics.setScissor(windowX, windowY, windowWidth, windowHeight)
-        
-        if openWindows[currentWindow] and openWindows[currentWindow].draw then
-            if canClick and currentMessageBox or currentTextInputBox then
+    local function drawWindow(id)
+        local window = openWindows[id]
+        if window.isActive then
+            cc = true
+            
+            windowX, windowY, windowWidth, windowHeight = window.windowX, window.windowY, window.windowWidth, window.windowHeight
+            love.graphics.translate(window.windowX, window.windowY)
+            
+            if canClick and currentMessageBox or currentTextInputBox or (id ~= currentWindow) then
                 prevCc = canClick
                 canClick, cc = false, false
             end
-            call(openWindows[currentWindow].draw)
+            
+            if not window.hideWindowDec then
+                windowDec(window, id)
+            end
+            if window then
+                love.graphics.setScissor(window.windowX, window.windowY, window.windowWidth, window.windowHeight)
+            end
+            
+            if window and window.draw then
+                call(window.draw)
+            end
+            
+            love.graphics.setScissor()
+            love.graphics.origin()
+            if not cc then canClick = prevCc end
+            setFont(style.font)
         end
-        
-        love.graphics.setScissor()
     end
-    love.graphics.origin()
-    if not cc then canClick = prevCc end
-    setFont(style.font)
+    
+    for id, _ in ipairs(openWindows) do
+        if id ~= currentWindow then
+            drawWindow(id)
+        end
+    end
+    
+    if currentWindow then
+        drawWindow(currentWindow)
+    end
+    
     drawTextInputBox()
     drawMessageBox()
 end

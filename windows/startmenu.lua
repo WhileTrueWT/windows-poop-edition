@@ -60,4 +60,11 @@ function window.draw()
     end, 80, menuHeight - 35, menuWidth-90, 30, {0.8, 0, 0}, {1, 1, 1})
 end
 
+function window.mousepressed(x, y)
+    if not (x <= window.windowWidth
+    and y >= window.windowY and y <= window.windowY + window.windowHeight) then
+        closeWindow()
+    end
+end
+
 return window
