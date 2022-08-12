@@ -165,8 +165,8 @@ function switchScreen(id, arg)
     end
 end
 
-function openWindow(id, arg)
-    local window, err = importWindow(id)
+function openWindow(file, arg)
+    local window, err = importWindow(file)
     if err then
         messageBox("Error", err, nil, "critical")
         return err
@@ -176,18 +176,20 @@ function openWindow(id, arg)
     currentTextInputBox = nil
     isDragging = false
     window.isActive = true
-    window.file = id
+    window.file = file
     
     table.insert(openWindows, window)
-    showWindow(#openWindows)
-    window.id = #openWindows
-    if openWindows[currentWindow].load then
-        local ok, msg = pcall(openWindows[currentWindow].load, arg)
+    
+    local id = #openWindows
+    window.id = id
+    if openWindows[id].load then
+        local ok, msg = pcall(openWindows[id].load, arg)
         if not ok then
             closeWindow(nil, true)
             messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
         end
     end
+    showWindow(#openWindows)
 end
 
 function closeWindow(id, force)
