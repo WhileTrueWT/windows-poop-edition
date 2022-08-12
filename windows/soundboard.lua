@@ -1,6 +1,8 @@
 local window = {}
 window.title = "Soundboard"
 window.icon = "images/icons/soundboard.png"
+window.windowWidth = 340
+window.windowHeight = 120
 
 local sounds = {
     ['1']="sounds/critical.wav",

@@ -1,6 +1,8 @@
 local window = {}
 window.title = "Importer"
 window.icon = "images/icons/download.png"
+window.windowWidth = 340
+window.windowHeight = 100
 
 local filename, name
 
