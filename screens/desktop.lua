@@ -39,6 +39,12 @@ end
 function screen.draw()
     local f = love.graphics.getFont()
     
+    local darkerColor = {
+        math.max(0, settings.themeColor[1] - 0.6),
+        math.max(0, settings.themeColor[2] - 0.4),
+        math.max(0, settings.themeColor[3] - 0)
+    }
+    
     image(settings.background, 0, 0, displayWidth, displayHeight)
     filegui.drawFileList(10, 10, displayWidth, displayHeight-50, not (isWindowOpen() or isMessageBoxShowing() or isTextInputShowing()))
     image("images/gradient.png", 0, displayHeight-taskbarHeight, displayWidth, taskbarHeight, settings.themeColor)
@@ -50,7 +56,7 @@ function screen.draw()
         if w.file ~= "windows/startmenu.lua" then
             local title = w.title or ""
             local width = math.max(f:getWidth(title) + 50, 180)
-            button(title, function() showWindow(id) end, ex, displayHeight-40, width, 40, nil, {1, 1, 1, 1}, nil, {0.4, 0.6, 1})
+            button(title, function() showWindow(id) end, ex, displayHeight-40, width, 40, nil, {1, 1, 1, 1}, nil, darkerColor)
             image(w.icon or "images/icons/app.png", ex+5, displayHeight-30, 20, 20)
             ex = ex + width
         end
@@ -68,7 +74,7 @@ function screen.draw()
         while isWindowOpen() do
             hideWindow()
         end
-    end, displayWidth - 10, displayHeight-taskbarHeight, 10, taskbarHeight, nil, nil, false, {0.4, 0.6, 1})
+    end, displayWidth - 10, displayHeight-taskbarHeight, 10, taskbarHeight, nil, nil, false, darkerColor)
     if notif then
         local w, h = 280, 100
         rect(displayWidth-w-10, displayHeight-taskbarHeight-h-10, w, h, {1, 1, 1, 1})
