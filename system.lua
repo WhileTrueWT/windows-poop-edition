@@ -180,6 +180,7 @@ function openWindow(id, arg)
     
     table.insert(openWindows, window)
     showWindow(#openWindows)
+    window.id = #openWindows
     if openWindows[currentWindow].load then
         local ok, msg = pcall(openWindows[currentWindow].load, arg)
         if not ok then

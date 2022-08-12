@@ -34,7 +34,7 @@ end
 
 local function notif(s)
     if not window.isActive then
-        notify(s, function() openWindow("windows/chat.lua") end)
+        notify(s, function() showWindow(window.id) end)
     end
 end
 
