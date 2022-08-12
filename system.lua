@@ -875,6 +875,7 @@ function callbacks.draw()
     
     local function drawWindow(id)
         local window = openWindows[id]
+        if not window then return end
         if window.isActive then
             cc = true
             
