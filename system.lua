@@ -223,7 +223,7 @@ function showWindow(id)
     window.windowY = window.windowY or (displayHeight / 2 - window.windowHeight / 2) + (id-1) * 40
 end
 
-function hideWindow()
+function hideWindow(id)
     if currentWindow == nil then return end
     
     openWindows[currentWindow].isActive = false

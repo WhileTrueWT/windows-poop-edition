@@ -60,7 +60,15 @@ function screen.draw()
     text(ct, displayWidth - f:getWidth(ct) - 20, displayHeight - 20 - f:getHeight() / 2 - 8, {1, 1, 1})
     text(cd, displayWidth - f:getWidth(cd) - 20, displayHeight - 20 - f:getHeight() / 2 + 8, {1, 1, 1})
     
-    button("", function() hideWindow() end, displayWidth - 10, displayHeight-taskbarHeight, 10, taskbarHeight, nil, nil, false, {0.4, 0.6, 1})
+    button("", function()
+        if #openWindows > 0 then
+            showWindow(#openWindows)
+        end
+        
+        while isWindowOpen() do
+            hideWindow()
+        end
+    end, displayWidth - 10, displayHeight-taskbarHeight, 10, taskbarHeight, nil, nil, false, {0.4, 0.6, 1})
     if notif then
         local w, h = 280, 100
         rect(displayWidth-w-10, displayHeight-taskbarHeight-h-10, w, h, {1, 1, 1, 1})
