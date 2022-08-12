@@ -1,9 +1,22 @@
 local page
 local currentPage
+local goToPage
 
 function goToPage(id, arg)
     page = id
-    currentPage = love.filesystem.load("_NOTHING/net/" .. page .. ".lua")()
+    local chunk = love.filesystem.load("_NOTHING/net/" .. page .. ".lua")
+    local env = {goToPage = goToPage}
+    setmetatable(env, {__index = _G})
+    setfenv(chunk, env)
+    
+    currentPage = chunk()
+    
+    for i, func in pairs(currentPage) do
+        if type(func) == "function" then
+            setfenv(currentPage[i], env)
+        end
+    end
+    
     if currentPage and currentPage.load then currentPage.load(arg) end
 end
 
