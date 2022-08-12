@@ -159,6 +159,7 @@ local function start()
     -- server = client:connect("localhost:8798")
     server = client:connect("alt.mondecitronne.com:8798")
     isConnecting = true
+    love.keyboard.setKeyRepeat(true)
 end
 
 function window.load()
@@ -263,6 +264,7 @@ function window.wheelmoved(x, y)
 end
 
 function window.close()
+    love.keyboard.setKeyRepeat(false)
     if server and client then
         server:disconnect()
         client:flush()
