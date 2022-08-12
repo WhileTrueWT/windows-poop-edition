@@ -745,22 +745,32 @@ function callbacks.load()
 end
 
 function callbacks.mousepressed(x, y, button)
-    for id = #openWindows, 1, -1 do
-        local window = openWindows[id]
+    if currentWindow
+    and x >= openWindows[currentWindow].windowX and x <= openWindows[currentWindow].windowX + openWindows[currentWindow].windowWidth
+    and y >= openWindows[currentWindow].windowY-30 and y <= openWindows[currentWindow].windowY + openWindows[currentWindow].windowHeight + 30
+    and not openWindows[currentWindow].hideWindowDec then
         
-        
-        if x >= window.windowX and x <= window.windowX + window.windowWidth
-        and y >= window.windowY-30 and y <= window.windowY then
-            if currentWindow ~= id then
-                currentWindow = id
-            end
+        if y <= openWindows[currentWindow].windowY then
+            isDragging = true
+        end
+    
+    else
+        for id = #openWindows, 1, -1 do
+            local window = openWindows[id]
             
-            if not window.hideWindowDec then
-                isDragging = true
+            if x >= window.windowX and x <= window.windowX + window.windowWidth
+            and y >= window.windowY-30 and y <= window.windowY + window.windowHeight + 30 then
+                if currentWindow == id then
+                    break
+                end
+                
+                currentWindow = id
+                canClick = false
+                break
             end
-            break
         end
     end
+    
     
     if openWindows[currentWindow] and openWindows[currentWindow].mousepressed then
         call(openWindows[currentWindow].mousepressed, x, y, button)
