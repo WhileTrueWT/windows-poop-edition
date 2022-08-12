@@ -62,7 +62,8 @@ end
 
 function window.mousepressed(x, y)
     if not (x <= window.windowWidth
-    and y >= window.windowY and y <= window.windowY + window.windowHeight) then
+    and y >= window.windowY and y <= window.windowY + window.windowHeight)
+    and not isMessageBox() then
         closeWindow()
     end
 end
