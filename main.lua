@@ -23,6 +23,8 @@ local function copyDir(src, dest)
     end
     
     currentDir = dest
+    coroutine.yield()
+    
     if dest ~= "" then
         assert(love.filesystem.createDirectory(dest))
     end
@@ -30,7 +32,6 @@ local function copyDir(src, dest)
     for _, item in ipairs(love.filesystem.getDirectoryItems(src)) do
         local info = love.filesystem.getInfo(src .. "/" .. item)
         if info.type == "directory" then
-            coroutine.yield()
             copyDir(src .. "/" .. item, dest .. "/" .. item)
         else
             local data, size = love.filesystem.read(src .. "/" .. item)
