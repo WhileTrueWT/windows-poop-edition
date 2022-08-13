@@ -1,87 +1,108 @@
-local callbacks = {}
-local err
+local totalSize
+local isInstalling
+local hasFinished
+local copiedSize = 0
+local currentDir = ""
 
-local function drawErr(msg)
-    if err then return else err = true end
-    print(msg)
-    love.audio.stop()
-    love.mouse.setVisible(false)
+local function determineDirSize(dir)
+    local size = 0
+    for _, item in ipairs(love.filesystem.getDirectoryItems(dir)) do
+        local info = love.filesystem.getInfo(dir .. "/" .. item)
+        if info.type == "directory" then
+            size = size + determineDirSize(dir .. "/" .. item)
+        else
+            size = size + (info.size or 0)
+        end
+    end
+    return size
+end
+
+local function copyDir(src, dest)
+    if src == "src/.git" then
+        return
+    end
     
-    if switchScreen then
-        switchScreen("screens/crash.lua", tostring(msg))
-    else
-        love.draw = nil
-        love.draw = function()
-            love.graphics.reset()
-            love.graphics.scale(2)
-            love.graphics.printf("CrapOS has failed.\n" .. tostring(msg), 0, 0, love.graphics.getWidth()/2)
+    currentDir = dest
+    if dest ~= "" then
+        assert(love.filesystem.createDirectory(dest))
+    end
+    
+    for _, item in ipairs(love.filesystem.getDirectoryItems(src)) do
+        local info = love.filesystem.getInfo(src .. "/" .. item)
+        if info.type == "directory" then
+            coroutine.yield()
+            copyDir(src .. "/" .. item, dest .. "/" .. item)
+        else
+            local data, size = love.filesystem.read(src .. "/" .. item)
+            love.filesystem.write(dest .. "/" .. item, data)
+            copiedSize = copiedSize + size
+        end
+    end
+end
+local copyDirCo = coroutine.create(copyDir)
+
+local function beginInstall()
+    isInstalling = true
+    totalSize = determineDirSize("src")
+    coroutine.resume(copyDirCo, "src", "")
+end
+
+local function finishInstall()
+    isInstalling = false
+    hasFinished = true
+end
+
+function love.load()
+    love.window.setTitle("Windows Poop Edition 5 Installer")
+    
+    isInstalling = false
+    hasFinished = false
+    love.graphics.setBackgroundColor(0.95, 0.95, 0.95)
+    love.graphics.setNewFont(16)
+end
+
+function love.update()
+    if isInstalling then
+        if coroutine.status(copyDirCo) == "dead" then
+            finishInstall()
+        else
+            coroutine.resume(copyDirCo)
         end
     end
 end
 
-function love.load()
-    local ok, msg = pcall(callbacks.load)
-    if not ok then drawErr(msg) end
-end
-
-function love.mousepressed(x, y, button)
-    local ok, msg = pcall(callbacks.mousepressed, x, y, button)
-    if not ok then drawErr(msg) end
-end
-
-function love.mousereleased(x, y, button)
-    local ok, msg = pcall(callbacks.mousereleased, x, y, button)
-    if not ok then drawErr(msg) end
-end
-
-function love.mousemoved(x, y, dx, dy)
-    local ok, msg = pcall(callbacks.mousemoved, x, y, dx, dy)
-    if not ok then drawErr(msg) end
-end
-
-function love.wheelmoved(x, y)
-    local ok, msg = pcall(callbacks.wheelmoved, x, y)
-    if not ok then drawErr(msg) end
-end
-
-function love.keypressed(key)
-    local ok, msg = pcall(callbacks.keypressed, key)
-    if not ok then drawErr(msg) end
-end
-
-function love.textinput(text)
-    local ok, msg = pcall(callbacks.textinput, text)
-    if not ok then drawErr(msg) end
-end
-
-function love.filedropped(file)
-    local ok, msg = pcall(callbacks.filedropped, file)
-    if not ok then drawErr(msg) end
-end
-
-function love.update(dt)
-    local ok, msg = pcall(callbacks.update, dt)
-    if not ok then drawErr(msg) end
-end
-
 function love.draw()
-    local ok, msg = pcall(callbacks.draw)
-    if not ok then drawErr(msg) end
-end
-
-function love.quit()
-    local ok, msg = pcall(callbacks.quit)
-    if not ok then drawErr(msg) end
-end
-
-local ok, chunk = pcall(love.filesystem.load, "system.lua")
-if ok then
-    local ok, msg = pcall(chunk)
-    if not ok then
-        drawErr(msg)
+    love.graphics.setColor(0.1, 0.1, 0.1)
+    
+    if not isInstalling and not hasFinished then
+    
+        love.graphics.printf("Welcome to the Windows Poop Edition 5 installer. This program will prepare your computer for the wonderful world of Windows PE!\n\nPress any key to begin installing...", 10, 10, love.graphics.getWidth()-20)
+    
+    elseif hasFinished then
+        
+        love.graphics.printf("Windows Poop Edition has installed successfully, I think. Now you can experience this OS's wonderful technologies!\n\nPress any key to reboot into Windows PE...", 10, 10, love.graphics.getWidth()-20)
+    
     else
-        callbacks = msg
+        
+        love.graphics.printf("Windows PE is installing...", 10, 10, love.graphics.getWidth()-20)
+        
+        love.graphics.print(string.format("Copying folder: %s", currentDir), 10, 30)
+        
+        love.graphics.setColor(0, 0, 0)
+        love.graphics.rectangle('fill', 10, 60, 500, 50)
+        
+        love.graphics.setColor(0, 0.5, 0)
+        love.graphics.rectangle('fill', 10, 60, (copiedSize / totalSize)*500, 50)
+        
+        love.graphics.setColor(0.1, 0.1, 0.1)
+        
     end
-else
-    drawErr(chunk)
+end
+
+function love.keypressed()
+    if not isInstalling and not hasFinished then
+        beginInstall()
+    elseif hasFinished then
+        love.event.quit("restart")
+    end
 end
