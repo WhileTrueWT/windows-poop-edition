@@ -1,5 +1,6 @@
 local window = {}
-window.title = "Settings"
+window.title = "Control Panel"
+window.icon = "images/icons/controlpanel.png"
 
 local wallpapers = {
     {"Default", "images/background.png"},
@@ -121,6 +122,16 @@ local sections = {
                 end}, {"No", function() closeMessageBox() end}})
             end, 10, 80, 140, 30)
             text("Resets all settings and restarts your computer", 160, 80, nil, windowWidth-290)
+            
+            text("WARNING: Everything below this point is stuff that you probably shouldn't touch unless you know what you're doing (at least somewhat)!", 10, 120, nil, windowWidth-290)
+            
+            text("appendToPath:", 10, 200)
+            button("Save Directory First", function()
+                settings.appendToPath = false
+            end, 160, 200, 240, 40)
+            button("Source Directory First", function()
+                settings.appendToPath = true
+            end, 160, 250, 240, 40)
         end
     },
 }

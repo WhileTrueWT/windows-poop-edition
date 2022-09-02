@@ -76,6 +76,7 @@ settings = {}
 
 settings.background = "images/background.png"
 settings.themeColor = {1, 1, 1, 1}
+settings.appendToPath = false
 
 -- SOUND SCHEME
 
@@ -367,6 +368,8 @@ function selectColor(onfinish)
     end)
 end
 
+-- just noticed these two functions are completely redundant lol
+-- i wont remove them, just in case it breaks some random thing
 function isWindowOpen()
     if currentWindow then
         return true
@@ -711,6 +714,8 @@ local cursor = style.cursor.image and love.mouse.newCursor(style.cursor.image)
 local callbacks = {}
 
 function callbacks.load()
+    love.filesystem.setIdentity(love.filesystem.getIdentity(), settings.appendToPath)
+    
     displayWidth, displayHeight = love.graphics.getWidth(), love.graphics.getHeight()
     
     messageX, messageY, messageWidth, messageHeight = displayWidth / 2 - 200, displayHeight / 2 - 60, 400, 120
@@ -745,6 +750,7 @@ function callbacks.load()
 end
 
 function callbacks.mousepressed(x, y, button)
+    if not (currentMessageBox or currentTextInputBox) then
     if currentWindow
     and x >= openWindows[currentWindow].windowX and x <= openWindows[currentWindow].windowX + openWindows[currentWindow].windowWidth
     and y >= openWindows[currentWindow].windowY-30 and y <= openWindows[currentWindow].windowY + openWindows[currentWindow].windowHeight + 30
@@ -769,6 +775,7 @@ function callbacks.mousepressed(x, y, button)
                 break
             end
         end
+    end
     end
     
     
