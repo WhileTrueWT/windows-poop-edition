@@ -193,6 +193,7 @@ function openWindow(file, arg)
     showWindow(#openWindows)
 end
 
+--[[
 function openSubwindow(window)
     currentMessageBox = nil
     currentTextInputBox = nil
@@ -212,6 +213,7 @@ function openSubwindow(window)
     end
     showWindow(#openWindows)
 end
+--]]
 
 function closeWindow(id, force)
     id = id or currentWindow

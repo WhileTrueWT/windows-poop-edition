@@ -21,7 +21,7 @@ local items = {
     {"Command Prompt", "images/icons/cmd.png", function() openWindow("windows/cmd.lua") end},
     {"Sound Recorder", "images/icons/soundrecorder.png", function() openWindow("windows/soundrecorder.lua") end},
     {"Calculator", "images/icons/calc.png", function() openWindow("windows/calc.lua") end},
-    {"Vurl IDE", "images/icons/vurl.png", function() openWindow("windows/vurlide.lua") end},
+    {"Visible Studio", "images/icons/visible-studio.png", function() openWindow("windows/visiblestudio.lua") end},
     {"UCanCode", "images/icons/code.png", function() openWindow("windows/ucancode.lua") end},
     {"Soundboard", "images/icons/soundboard.png", function() openWindow("windows/soundboard.lua") end},
 }
