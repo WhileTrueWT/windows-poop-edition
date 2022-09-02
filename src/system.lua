@@ -193,6 +193,26 @@ function openWindow(file, arg)
     showWindow(#openWindows)
 end
 
+function openSubwindow(window)
+    currentMessageBox = nil
+    currentTextInputBox = nil
+    isDragging = false
+    window.isActive = true
+    
+    table.insert(openWindows, window)
+    
+    local id = #openWindows
+    window.id = id
+    if openWindows[id].load then
+        local ok, msg = pcall(openWindows[id].load, arg)
+        if not ok then
+            closeWindow(nil, true)
+            messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
+        end
+    end
+    showWindow(#openWindows)
+end
+
 function closeWindow(id, force)
     id = id or currentWindow
     

@@ -7,13 +7,11 @@ local txt
 local t
 local f
 local cursorPos
-local scrollY
 
 function window.load(file)
     txt = nil
     f = nil
     t = 0
-    scrollY = 0
     window.title = "Notepad"
     
     love.keyboard.setKeyRepeat(true)
@@ -57,13 +55,6 @@ function window.keypressed(key)
             cursorPos = cursorPos - 1
         until string.sub(txt, cursorPos, cursorPos) == "\n"
         if cursorPos > 0 then cursorPos = cursorPos - 1 end
-        
-        local f = love.graphics.getFont()
-        local _, lines = f:getWrap(string.sub(txt, 1, cursorPos), windowWidth)
-        print(scrollY, #lines)
-        if #lines <= scrollY then
-            scrollY = scrollY + 1
-        end
     end
     
     if key == "down" then
@@ -74,12 +65,6 @@ function window.keypressed(key)
             until string.sub(txt, cursorPos, cursorPos) == "\n"
         end
         cursorPos = cursorPos - 1
-        
-        local f = love.graphics.getFont()
-        local _, lines = f:getWrap(string.sub(txt, 1, cursorPos), windowWidth)
-        if #lines > math.floor((windowHeight - 30) / f:getHeight()) then
-            scrollY = scrollY - 1
-        end
     end
     
     if key == "tab" then
@@ -134,10 +119,12 @@ function window.draw()
     end
     
     local f = love.graphics.getFont()
+    local _, lines = f:getWrap(string.sub(txt, 1, cursorPos), windowWidth)
+    local pos = #lines <= math.floor((windowHeight - 30) / f:getHeight()) and 0 or 0 - #lines * f:getHeight() + (windowHeight - 30)
     
     love.graphics.setScissor(windowX, windowY + 30, windowWidth, windowHeight - 30)
     
-    text((cursorPos >= 1 and string.sub(txt, 1, cursorPos) or "") .. textCursor .. string.sub(txt, cursorPos+1), 0, 30 + scrollY * f:getHeight(), nil, windowWidth)
+    text((cursorPos >= 1 and string.sub(txt, 1, cursorPos) or "") .. textCursor .. string.sub(txt, cursorPos+1), 0, 30 + pos, nil, windowWidth)
     
     love.graphics.setScissor()
 end
@@ -147,3 +134,4 @@ function window.close()
 end
 
 return window
+
