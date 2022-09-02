@@ -8,6 +8,24 @@ local t
 local f
 local cursorPos
 
+local function moveUp()
+    repeat
+        if cursorPos <= 1 then break end
+        cursorPos = cursorPos - 1
+    until string.sub(txt, cursorPos, cursorPos) == "\n"
+    if cursorPos > 0 then cursorPos = cursorPos - 1 end
+end
+
+local function moveDown()
+    for i=1,2 do
+        repeat
+            if cursorPos > #txt then break end
+            cursorPos = cursorPos + 1
+        until string.sub(txt, cursorPos, cursorPos) == "\n"
+    end
+    cursorPos = cursorPos - 1
+end
+
 function window.load(file)
     txt = nil
     f = nil
@@ -22,7 +40,7 @@ function window.load(file)
         window.title = "Notepad - " .. file
     end, file) else txt = "" end
     
-    cursorPos = #txt
+    cursorPos = 0
 end
 
 function window.keypressed(key)
@@ -50,21 +68,11 @@ function window.keypressed(key)
     end
     
     if key == "up" then
-        repeat
-            if cursorPos <= 1 then break end
-            cursorPos = cursorPos - 1
-        until string.sub(txt, cursorPos, cursorPos) == "\n"
-        if cursorPos > 0 then cursorPos = cursorPos - 1 end
+        moveUp()
     end
     
     if key == "down" then
-        for i=1,2 do
-            repeat
-                if cursorPos > #txt then break end
-                cursorPos = cursorPos + 1
-            until string.sub(txt, cursorPos, cursorPos) == "\n"
-        end
-        cursorPos = cursorPos - 1
+        moveDown()
     end
     
     if key == "tab" then
@@ -105,6 +113,7 @@ function window.draw()
         txt = content
         f = name
         window.title = "Notepad - " .. f
+        cursorPos = 0
     end) end, ex, 0, 60, 30)
     ex = ex + 60
     button("Save", function()
@@ -130,6 +139,14 @@ function window.draw()
     text((cursorPos >= 1 and string.sub(textChunk, 1, cursorPos-textStart+1) or "") .. textCursor .. string.sub(textChunk, cursorPos-textStart+2), 0, 30 + pos, nil, windowWidth)
     
     love.graphics.setScissor()
+end
+
+function window.wheelmoved(dx, dy)
+    if dy > 0 then
+        moveUp()
+    elseif dy < 0 then
+        moveDown()
+    end
 end
 
 function window.close()
