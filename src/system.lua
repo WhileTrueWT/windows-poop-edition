@@ -714,13 +714,16 @@ local cursor = style.cursor.image and love.mouse.newCursor(style.cursor.image)
 local callbacks = {}
 
 function callbacks.load()
-    love.filesystem.setIdentity(love.filesystem.getIdentity(), settings.appendToPath)
     
     displayWidth, displayHeight = love.graphics.getWidth(), love.graphics.getHeight()
     
     messageX, messageY, messageWidth, messageHeight = displayWidth / 2 - 200, displayHeight / 2 - 60, 400, 120
     
     inputtingText = false
+    
+    loadSettings("settings")
+    
+    love.filesystem.setIdentity(love.filesystem.getIdentity(), settings.appendToPath)
     
     for _, file in ipairs(love.filesystem.getDirectoryItems("screens")) do
         importScreen("screens/" .. file)
@@ -743,8 +746,6 @@ function callbacks.load()
     if not love.filesystem.getInfo("user/Desktop") then
         love.filesystem.createDirectory("user/Desktop")
     end
-    
-    loadSettings("settings")
     
     switchScreen(startingScreen, arg)
 end
