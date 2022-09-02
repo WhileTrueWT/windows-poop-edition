@@ -127,10 +127,10 @@ local sections = {
             
             text("appendToPath:", 10, 200)
             button("Save Directory First", function()
-                settings.appendToPath = false
+                settings.appendToPath = "false"
             end, 160, 200, 240, 40)
             button("Source Directory First", function()
-                settings.appendToPath = true
+                settings.appendToPath = "true"
             end, 160, 250, 240, 40)
         end
     },

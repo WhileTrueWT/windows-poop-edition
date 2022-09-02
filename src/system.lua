@@ -76,7 +76,7 @@ settings = {}
 
 settings.background = "images/background.png"
 settings.themeColor = {1, 1, 1, 1}
-settings.appendToPath = false
+settings.appendToPath = "false"
 
 -- SOUND SCHEME
 
@@ -741,9 +741,7 @@ function callbacks.load()
     
     inputtingText = false
     
-    loadSettings("settings")
-    
-    love.filesystem.setIdentity(love.filesystem.getIdentity(), settings.appendToPath)
+    love.filesystem.setIdentity(love.filesystem.getIdentity(), false)
     
     for _, file in ipairs(love.filesystem.getDirectoryItems("screens")) do
         importScreen("screens/" .. file)
@@ -766,6 +764,10 @@ function callbacks.load()
     if not love.filesystem.getInfo("user/Desktop") then
         love.filesystem.createDirectory("user/Desktop")
     end
+    
+    loadSettings("settings")
+    
+    love.filesystem.setIdentity(love.filesystem.getIdentity(), settings.appendToPath == "true")
     
     switchScreen(startingScreen, arg)
 end
@@ -948,6 +950,7 @@ function callbacks.draw()
 end
 
 function callbacks.quit()
+    love.filesystem.setIdentity(love.filesystem.getIdentity(), false)
     saveSettings("settings")
     love.mouse.setCursor()
 end

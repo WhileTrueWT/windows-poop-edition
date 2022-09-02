@@ -119,12 +119,15 @@ function window.draw()
     end
     
     local f = love.graphics.getFont()
-    local _, lines = f:getWrap(string.sub(txt, 1, cursorPos), windowWidth)
+    local textStart = math.max(1, cursorPos-500)
+    local textEnd = math.min(#txt, cursorPos+500)
+    local textChunk = string.sub(txt, textStart, textEnd)
+    local _, lines = f:getWrap(string.sub(textChunk, 1, cursorPos), windowWidth)
     local pos = #lines <= math.floor((windowHeight - 30) / f:getHeight()) and 0 or 0 - #lines * f:getHeight() + (windowHeight - 30)
     
     love.graphics.setScissor(windowX, windowY + 30, windowWidth, windowHeight - 30)
     
-    text((cursorPos >= 1 and string.sub(txt, 1, cursorPos) or "") .. textCursor .. string.sub(txt, cursorPos+1), 0, 30 + pos, nil, windowWidth)
+    text((cursorPos >= 1 and string.sub(textChunk, 1, cursorPos-textStart+1) or "") .. textCursor .. string.sub(textChunk, cursorPos-textStart+2), 0, 30 + pos, nil, windowWidth)
     
     love.graphics.setScissor()
 end
