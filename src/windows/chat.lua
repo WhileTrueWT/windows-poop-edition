@@ -58,7 +58,7 @@ local function writeMessage(message)
     end
     
     local f = love.graphics.getFont()
-    local _, lines = f:getWrap(s, windowWidth-90)
+    local _, lines = f:getWrap(s, window.windowWidth-90)
     for _, l in ipairs(lines) do
         table.insert(line, l)
     end
