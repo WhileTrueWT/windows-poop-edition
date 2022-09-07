@@ -245,15 +245,19 @@ function tools.text.draw()
     love.graphics.pop()
 end
 
-local function saveImg()
+local function saveImg(close)
     local imgdata, err = canvas:newImageData():encode("png")
     if not imgdata and err then
         messageBox("Error", err, {{"OK", function() closeMessageBox() end}}, "sounds/critical.wav")
     end
     
     save(f, imgdata:getString(), "png", function(path)
-        f = path
-        window.title = "Paint - " .. f
+        if close then
+            closeWindow(nil, true)
+        else
+            f = path
+            window.title = "Paint - " .. f
+        end
     end)
 end
 
@@ -350,6 +354,23 @@ function window.draw()
     end
     
     button("Custom Color", function() if isDown then return end selectColor(function(c) color = c end) end, 580, 30, 120, 30)
+end
+
+function window.close()
+    messageBox("Paint", "Save changes?", {
+        {"Yes", function()
+            closeMessageBox()
+            saveImg(true)
+        end},
+        {"No", function()
+            love.keyboard.setKeyRepeat(false)
+            closeWindow(nil, true)
+        end},
+        {"Cancel", function()
+            closeMessageBox()
+        end},
+    })
+    return true
 end
 
 return window

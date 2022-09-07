@@ -218,9 +218,9 @@ end
 function closeWindow(id, force)
     id = id or currentWindow
     
-    if openWindows[id] and openWindows[id].close then
+    if not force and openWindows[id] and openWindows[id].close then
         local status = openWindows[id].close()
-        if status and not force then
+        if status then
             return status
         end
     end

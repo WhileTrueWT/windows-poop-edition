@@ -256,9 +256,10 @@ function window.draw()
         
         local ex = 0
         button("New", function() messageBox("Visible Studio", "Save changes?", {{"Yes", function()
-            save(f, txt, "vurl")
-            closeMessageBox()
-            window.load()
+            save(f, txt, curLang.ext, function(name)
+                closeMessageBox()
+                window.load()
+            end)
         end}, {"No", function()
             closeMessageBox()
             window.load()
@@ -267,7 +268,7 @@ function window.draw()
         button("Open", openProject, ex, 0, 60, 30)
         ex = ex + 60
         button("Save", function()
-            save(f, txt, "vurl", function(name)
+            save(f, txt, curLang.ext, function(name)
                 f = name window.title = "Visible Studio - " .. f
             end)
         end, ex, 0, 60, 30)
@@ -342,8 +343,26 @@ function window.draw()
     end
 end
 
-function window.quit()
-    love.keyboard.setKeyRepeat(false)
+function window.close()
+    if mode ~= "main" then return end
+    
+    messageBox("Visible Studio", "Save changes?", {
+        {"Yes", function()
+            closeMessageBox()
+            save(f, txt, curLang.ext, function()
+                love.keyboard.setKeyRepeat(false)
+                closeWindow(nil, true)
+            end)
+        end},
+        {"No", function()
+            love.keyboard.setKeyRepeat(false)
+            closeWindow(nil, true)
+        end},
+        {"Cancel", function()
+            closeMessageBox()
+        end},
+    })
+    return true
 end
 
 return window

@@ -147,7 +147,23 @@ function window.wheelmoved(dx, dy)
 end
 
 function window.close()
-    love.keyboard.setKeyRepeat(false)
+    messageBox("Notepad", "Save changes?", {
+        {"Yes", function()
+            closeMessageBox()
+            save(f, txt, "txt", function()
+                love.keyboard.setKeyRepeat(false)
+                closeWindow(nil, true)
+            end)
+        end},
+        {"No", function()
+            love.keyboard.setKeyRepeat(false)
+            closeWindow(nil, true)
+        end},
+        {"Cancel", function()
+            closeMessageBox()
+        end},
+    })
+    return true
 end
 
 return window
