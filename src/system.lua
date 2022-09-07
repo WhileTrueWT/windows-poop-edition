@@ -666,7 +666,7 @@ function drawTextInputBox()
     if currentTextInputBox then
         if currentTextInputBox.type == "text" then
             local lx, ly, lw, lh = displayWidth/2 - 180, displayHeight/2 - 40, 360, 80
-            rect(lx, ly, lw, lh)
+            rect(lx, ly, lw, lh, style.window.backgroundColor)
             outline(lx, ly, lw, lh)
 
             text(currentTextInputBox.title, lx+5, ly+5)
@@ -689,7 +689,7 @@ function drawTextInputBox()
             button("Cancel", function() currentTextInputBox = nil end, lx+5, ly+50, 60, 25)
         elseif currentTextInputBox.type == "fileopen" then
             local lx, ly, lw, lh = displayWidth/2 - 240, displayHeight/2 - 150, 480, 300
-            rect(lx, ly, lw, lh)
+            rect(lx, ly, lw, lh, style.window.backgroundColor)
             outline(lx, ly, lw, lh)
             
             button("Up", function() filegui.cd("..") end, lx+5, ly+5, 30, 25)
@@ -702,7 +702,7 @@ function drawTextInputBox()
             button("Cancel", function() currentTextInputBox = nil end, lx+5, ly+270, 60, 25)
         elseif currentTextInputBox.type == "filesave" then
             local lx, ly, lw, lh = displayWidth/2 - 240, displayHeight/2 - 150, 480, 300
-            rect(lx, ly, lw, lh)
+            rect(lx, ly, lw, lh, style.window.backgroundColor)
             outline(lx, ly, lw, lh)
             
             button("Up", function() filegui.cd("..") end, lx+5, ly+5, 30, 25)
