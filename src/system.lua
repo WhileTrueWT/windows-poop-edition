@@ -581,7 +581,7 @@ end
 function importWindow(file)
     local window = {}
     
-    if not love.filesystem.getInfo(file) then return "ERROR: file '" .. tostring(file) .. "' does not exist"  end
+    if not love.filesystem.getInfo(file) then return nil, "ERROR: file '" .. tostring(file) .. "' does not exist"  end
     
     local ok, chunk, result
     ok, chunk = pcall(love.filesystem.load, file)
