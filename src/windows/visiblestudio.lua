@@ -377,7 +377,7 @@ function window.draw()
             local _, lines = f:getWrap(string.sub(txt, 1, cursorPos), windowWidth)
             local pos = #lines <= math.floor((windowHeight/2 - 60) / f:getHeight()) and 0 or 0 - #lines * f:getHeight() + (windowHeight/2 - 60)
             
-            love.graphics.setScissor(windowX, windowY + 60, textAreaWidth, textAreaHeight - 30)
+            love.graphics.setScissor(windowX, windowY + 60, textAreaWidth, textAreaHeight - 60)
             
             text((cursorPos >= 1 and string.sub(txt, 1, cursorPos) or "") .. textCursor .. string.sub(txt, cursorPos+1), 0, 60 + pos, nil, textAreaWidth)
             
@@ -389,6 +389,8 @@ function window.draw()
             
             love.graphics.setScissor()
             setFont("fonts/DejaVuSans.ttf")
+        elseif #tabs == 0 then
+            text("Select a file below to open it!", 5, 60)
         end
         
         love.graphics.setColor(0, 0, 0, 1)
