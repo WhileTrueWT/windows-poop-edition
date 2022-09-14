@@ -299,6 +299,16 @@ function fileInput(onfinish, startdir)
     currentTextInputBox = {title="", input="", onfinish=onfinish, type="fileopen"}
 end
 
+function dirInput(onfinish, startdir)
+    startdir = startdir or "user/"
+    filegui.cd = function(path)
+        currentTextInputBox.dir = path
+        filegui.initFileList(path)
+    end
+    filegui.initFileList(startdir)
+    currentTextInputBox = {title="", input="", onfinish=onfinish, type="diropen", dir=startdir}
+end
+
 function fileSaveInput(onfinish, startdir)
     filegui.cd = function(path)
         filegui.initFileList(path)
@@ -700,6 +710,20 @@ function drawTextInputBox()
             end})
             
             button("Cancel", function() currentTextInputBox = nil end, lx+5, ly+270, 60, 25)
+        elseif currentTextInputBox.type == "diropen" then
+            local lx, ly, lw, lh = displayWidth/2 - 240, displayHeight/2 - 150, 480, 300
+            rect(lx, ly, lw, lh, style.window.backgroundColor)
+            outline(lx, ly, lw, lh)
+            
+            button("Up", function() filegui.cd("..") end, lx+5, ly+5, 30, 25)
+            
+            filegui.drawFileList(lx+5, ly+30, lw-10, lh-40, canClick)
+            
+            button("Select Folder", function()
+                currentTextInputBox.onfinish(currentTextInputBox.dir)
+                currentTextInputBox = nil
+            end, lx+5, ly+270, 160, 25)
+            button("Cancel", function() currentTextInputBox = nil end, lx+170, ly+270, 60, 25)
         elseif currentTextInputBox.type == "filesave" then
             local lx, ly, lw, lh = displayWidth/2 - 240, displayHeight/2 - 150, 480, 300
             rect(lx, ly, lw, lh, style.window.backgroundColor)
@@ -758,13 +782,17 @@ function callbacks.load()
     
     t = 0
     
-    local info = love.filesystem.getInfo("user")
+    local info = love.filesystem.getInfo("user", "directory")
     if not info then
         love.filesystem.createDirectory("user")
     end
 
-    if not love.filesystem.getInfo("user/Desktop") then
+    if not love.filesystem.getInfo("user/Desktop", "directory") then
         love.filesystem.createDirectory("user/Desktop")
+    end
+    
+    if not love.filesystem.getInfo("ProgramFiles", "directory") then
+        love.filesystem.createDirectory("ProgramFiles")
     end
     
     loadSettings("settings")
