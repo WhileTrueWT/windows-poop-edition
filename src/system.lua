@@ -166,6 +166,70 @@ function switchScreen(id, arg)
     end
 end
 
+-- once the new executable format works, and all/most existing programs are converted,
+-- this shall become openWindow.
+function openExe(file, arg)
+    if not love.filesystem.getInfo(file, "file") then
+        local err = string.format("ERROR: file '%s' does not exist", file)
+        messageBox("Error", err, nil, "critical")
+        return err
+    end
+    
+    local data = love.filesystem.read(file)
+    
+    local programName, programIcon, pos = love.data.unpack("zz", data)
+    
+    local resnames = {}
+    local rescount
+    rescount, pos = love.data.unpack("T", data, pos)
+    
+    for _ = 1, rescount do
+        local name
+        name, pos = love.data.unpack("z", data, pos)
+        
+        table.insert(resnames, name)
+    end
+    
+    local resources = {}    
+    for _, name in ipairs(resnames) do
+        local s
+        s, pos = love.data.unpack("s", data, pos)
+        resources[name] = love.filesystem.newFileData(s, name)
+    end
+    
+    if not resources["main.lua"] then
+        local err = string.format("ERROR: executable '%s' has no entry point", file)
+        messageBox("Error", err, nil, "critical")
+        return err
+    end
+    
+    local window, err = importWindow(resources["main.lua"])
+    if err then
+        messageBox("Error", err, nil, "critical")
+        return err
+    end
+    
+    currentMessageBox = nil
+    currentTextInputBox = nil
+    isDragging = false
+    window.isActive = true
+    window.file = file
+    window.resources = resources
+    
+    table.insert(openWindows, window)
+    
+    local id = #openWindows
+    window.id = id
+    if openWindows[id].load then
+        local ok, msg = pcall(openWindows[id].load, arg)
+        if not ok then
+            closeWindow(nil, true)
+            messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
+        end
+    end
+    showWindow(#openWindows)
+end
+
 function openWindow(file, arg)
     local window, err = importWindow(file)
     if err then
@@ -591,10 +655,14 @@ end
 function importWindow(file)
     local window = {}
     
-    if not love.filesystem.getInfo(file) then return nil, "ERROR: file '" .. tostring(file) .. "' does not exist"  end
+    if (type(file) == "string") and not love.filesystem.getInfo(file) then return nil, "ERROR: file '" .. tostring(file) .. "' does not exist"  end
     
     local ok, chunk, result
-    ok, chunk = pcall(love.filesystem.load, file)
+    if (type(file) == "string") then
+        ok, chunk = pcall(love.filesystem.load, file)
+    else
+        ok, chunk = pcall(loadstring, file:getString(), file:getFilename())
+    end
     if not ok then
         window = {load = function() messageBox("Program Error", chunk, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
     else

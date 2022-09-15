@@ -16,10 +16,10 @@ local function packageExe()
     
     local files = love.filesystem.getDirectoryItems(dir)
     
+    out = out .. love.data.pack("string", "T", #files)
     for _, file in ipairs(files) do
-        out = out .. love.data.pack("string", "s", file)
+        out = out .. love.data.pack("string", "z", file)
     end
-    out = out .. "\0"
     
     for _, file in ipairs(files) do
         local data = love.filesystem.read(dir .. file)
