@@ -717,7 +717,7 @@ function drawTextInputBox()
             
             button("Up", function() filegui.cd("..") end, lx+5, ly+5, 30, 25)
             
-            filegui.drawFileList(lx+5, ly+30, lw-10, lh-40, canClick)
+            filegui.drawFileList(lx+5, ly+30, lw-10, lh-40, canClick, {onFileOpen = function() end})
             
             button("Select Folder", function()
                 currentTextInputBox.onfinish(currentTextInputBox.dir)
