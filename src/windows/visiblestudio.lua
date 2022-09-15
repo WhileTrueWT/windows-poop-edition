@@ -277,6 +277,8 @@ function window.keypressed(key)
             window.textinput(" ")
         end
     end
+    
+    curTab.txt = txt
 end
 
 function window.textinput(text)
@@ -286,6 +288,8 @@ function window.textinput(text)
     
     txt = (cursorPos >= 1 and string.sub(txt, 1, cursorPos) or "") .. text .. (cursorPos < #txt and string.sub(txt, cursorPos+1) or "")
     cursorPos = cursorPos + 1
+    
+    curTab.txt = txt
 end
 
 function window.update(dt)
@@ -306,7 +310,7 @@ function window.draw()
     
     if mode == "main" then
         rect(0, 0, textAreaWidth, windowHeight, {1, 1, 1})
-        outline(0, 0, textAreaWidth, windowHeight)
+        outline(0, 0, textAreaWidth, textAreaHeight)
         
         rect(0, 0, windowWidth, 30, {0.75, 0.75, 0.75})
         
@@ -498,23 +502,36 @@ end
 function window.close()
     if mode ~= "main" then return end
     
-    messageBox("Visible Studio", "Save changes?", {
-        {"Yes", function()
-            closeMessageBox()
-            save(f, txt, curLang.ext, function()
+    local unsavedFiles = 0
+    for _, tab in ipairs(tabs) do
+        if tab.unsaved then
+            unsavedFiles = unsavedFiles + 1
+        end
+    end
+    
+    if unsavedFiles > 0 then
+        messageBox("Visible Studio", string.format("There are %d files with unsaved changes. Would you like to save all of these files?", unsavedFiles), {
+            {"Yes", function()
+                closeMessageBox()
+                for _, tab in ipairs(tabs) do
+                    if tab.unsaved then
+                        save(tab.file, tab.txt, nil, function()
+                            love.keyboard.setKeyRepeat(false)
+                            closeWindow(nil, true)
+                        end)
+                    end
+                end
+            end},
+            {"No", function()
                 love.keyboard.setKeyRepeat(false)
                 closeWindow(nil, true)
-            end)
-        end},
-        {"No", function()
-            love.keyboard.setKeyRepeat(false)
-            closeWindow(nil, true)
-        end},
-        {"Cancel", function()
-            closeMessageBox()
-        end},
-    })
-    return true
+            end},
+            {"Cancel", function()
+                closeMessageBox()
+            end},
+        })
+        return true
+    end
 end
 
 return window
