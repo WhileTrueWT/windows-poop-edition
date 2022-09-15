@@ -176,7 +176,6 @@ local function openFile(file)
         
         txt = curTab.txt
         f = curTab.file
-        curLang = curTab.lang
         
         mode = "main"
     end, file)
@@ -362,8 +361,27 @@ function window.draw()
             end, bx, 30, width, 30, {0, 0, 0, 0}, nil, false)
             
             button("X", function()
-                table.remove(tabs, i)
-                curTab = (i > 1) and tabs[i-1] or (#tabs > 0) and i+1 or nil
+                local function close()
+                    table.remove(tabs, i)
+                    curTab = (i > 1) and tabs[i-1] or (#tabs > 0) and i+1 or nil
+                end
+                
+                messageBox("Visible Studio", "Save changes to this file?", {
+                    {"Yes", function()
+                        closeMessageBox()
+                        save(tab.file, tab.txt, nil, function()
+                            close()
+                        end)
+                    end},
+                    {"No", function()
+                        closeMessageBox()
+                        close()
+                    end},
+                    {"Cancel", function()
+                        closeMessageBox()
+                    end}
+                })
+                
             end, bx+width, 30, 20, 20, {0.8, 0, 0, 1}, {1, 1, 1, 1})
             
             bx = bx + width + 20
