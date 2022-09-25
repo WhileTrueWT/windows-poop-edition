@@ -26,6 +26,8 @@ windowX, windowY, windowWidth, windowHeight = 0, 0, 0, 0
 
 local isDragging = false
 
+local callingWindow
+
 stdin = ""
 stdout = ""
 
@@ -169,6 +171,9 @@ end
 -- once the new executable format works, and all/most existing programs are converted,
 -- this shall become openWindow.
 function openExe(file, arg)
+    local targetFormatVersion = "0.0.0"
+    local tMajor, tMinor, tPatch = string.match(targetFormatVersion, "^(%d+).(%d+).(%d+)$")
+    
     if not love.filesystem.getInfo(file, "file") then
         local err = string.format("ERROR: file '%s' does not exist", file)
         messageBox("Error", err, nil, "critical")
@@ -177,7 +182,27 @@ function openExe(file, arg)
     
     local data = love.filesystem.read(file)
     
-    local programName, programIcon, pos = love.data.unpack("zz", data)
+    local magicNumber, pos = love.data.unpack("c2", data)
+    if not magicNumber == string.char(132, 248) then
+        local err = string.format("%s is not a valid Windows PE application. (Magic number mismatch)", file)
+        messageBox("Error", err, nil, "critical")
+        return err
+    end
+    
+    local formatVersion, programName, programIcon, pos = love.data.unpack("zzz", data)
+    local vMajor, vMinor, vPatch = string.match(formatVersion, "^(%d+).(%d+).(%d+)$") or function()
+        
+        local err = string.format("Error decoding '%s': misformatted version string", file)
+        messageBox("Error", err, nil, "critical")
+        return err
+        
+    end
+    
+    if vMajor ~= tMajor then
+        local err = string.format("%s: This file's format is of an incompatable version (%s, expected %d.x.x)", file, formatVersion, tMajor)
+        messageBox("Error", err, nil, "critical")
+        return err
+    end
     
     local resnames = {}
     local rescount
@@ -214,7 +239,11 @@ function openExe(file, arg)
     isDragging = false
     window.isActive = true
     window.file = file
-    window.resources = resources
+    
+    window.resources = {}
+    for k,v in pairs(resources) do
+        window.resources[k] = v
+    end
     
     table.insert(openWindows, window)
     
@@ -549,16 +578,23 @@ local images = {}
 function importImage(file)
     if images[file] then return end
     
-    local info = love.filesystem.getInfo(file)
-    if not info then return "ERROR: file '" .. tostring(file) .. "' does not exist"  end
-    if info.type ~= "file" then return "ERROR: '" .. tostring(file) .. "' is not a file"  end
+    local filedata
+    --[[if callingWindow and callingWindow.resources and callingWindow.resources[file] then
+        filedata = callingWindow.resources[file]
+    else
+        if not love.filesystem.getInfo(file, "file") then return nil, "ERROR: file '" .. tostring(file) .. "' does not exist"  end
+    end]]--
     
-    images[file] = love.graphics.newImage(file)
+    local id = filedata and ("@" .. callingWindow.file .. ":" .. file) or file
+    images[id] = love.graphics.newImage(filedata or file)
+    return id
 end
 
 function image(img, x, y, width, height, color)
+    --if (not images[img]) and (callingWindow and not images["@" .. callingWindow.file .. ":" .. img]) then
     if not images[img] then
-        local err = importImage(img)
+        local err
+        img, err = importImage(img)
         if err then
             return
         end
@@ -901,13 +937,17 @@ function callbacks.mousepressed(x, y, button)
     
     
     if openWindows[currentWindow] and openWindows[currentWindow].mousepressed then
+        callingWindow = openWindows[currentWindow]
         call(openWindows[currentWindow].mousepressed, x, y, button)
+        callingWindow = nil
     end
 end
 
 function callbacks.mousereleased(x, y, button)
     if openWindows[currentWindow] and openWindows[currentWindow].mousereleased then
+        callingWindow = openWindows[currentWindow]
         call(openWindows[currentWindow].mousereleased, x, y, button)
+        callingWindow = nil
     end
     canClick = true
     isDragging = false
@@ -925,7 +965,9 @@ function callbacks.mousemoved(x, y, dx, dy)
         end
         
         if openWindows[currentWindow].mousemoved then
+            callingWindow = openWindows[currentWindow]
             call(openWindows[currentWindow].mousemoved, x, y, dx, dy)
+            callingWindow = nil
         end
     end
 end
@@ -933,7 +975,9 @@ end
 function callbacks.wheelmoved(x, y)
     if filegui then filegui.wheelmoved(x, y) end
     if openWindows[currentWindow] and openWindows[currentWindow].wheelmoved then
+        callingWindow = openWindows[currentWindow]
         call(openWindows[currentWindow].wheelmoved, x, y)
+        callingWindow = nil
     end
 end
 
@@ -962,7 +1006,9 @@ function callbacks.keypressed(key)
             currentTextInputBox = nil
         end
     elseif openWindows[currentWindow] and openWindows[currentWindow].keypressed then
+        callingWindow = openWindows[currentWindow]
         call(openWindows[currentWindow].keypressed, key)
+        callingWindow = nil
     end
 end
 
@@ -970,13 +1016,17 @@ function callbacks.textinput(text)
     if currentTextInputBox then
         currentTextInputBox.input = currentTextInputBox.input .. text
     elseif openWindows[currentWindow] and openWindows[currentWindow].textinput then
+        callingWindow = openWindows[currentWindow]
         openWindows[currentWindow].textinput(text)
+        callingWindow = nil
     end
 end
 
 function callbacks.filedropped(file)
     if openWindows[currentWindow] and openWindows[currentWindow].filedropped then
+        callingWindow = openWindows[currentWindow]
         call(openWindows[currentWindow].filedropped, file)
+        callingWindow = nil
     end
 end
 
@@ -987,7 +1037,9 @@ function callbacks.update(dt)
     end
     for _, w in ipairs(openWindows) do
         if w.update then
+            callingWindow = w
             call(w.update, dt)
+            callingWindow = nil
         end
     end
 end
@@ -1023,7 +1075,9 @@ function callbacks.draw()
             end
             
             if window and window.draw then
+                callingWindow = window
                 call(window.draw)
+                callingWindow = nil
             end
             
             love.graphics.setScissor()

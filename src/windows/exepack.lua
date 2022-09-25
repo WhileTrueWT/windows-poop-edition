@@ -1,6 +1,9 @@
 local window = {}
 window.title = "Executable Packager"
 
+local formatVersion = "0.0.0"
+local magicNumber = string.char(132, 248)
+
 local dir
 local programName
 local icon
@@ -9,7 +12,10 @@ local hasStarted = false
 local function packageExe()
     hasStarted = true
     
-    local out = love.data.pack("string", "zz",
+    local out = magicNumber
+    
+    out = out .. love.data.pack("string", "zzz",
+        formatVersion,
         programName,
         icon
     )
