@@ -250,6 +250,7 @@ function openExe(file, arg)
     isDragging = false
     window.isActive = true
     window.file = file
+    window.icon = programIcon
     
     window.resources = {}
     for k,v in pairs(resources) do
