@@ -580,25 +580,30 @@ function importImage(file)
     if images[file] then return end
     
     local filedata
-    --[[if callingWindow and callingWindow.resources and callingWindow.resources[file] then
+    if callingWindow and callingWindow.resources and callingWindow.resources[file] then
         filedata = callingWindow.resources[file]
     else
         if not love.filesystem.getInfo(file, "file") then return nil, "ERROR: file '" .. tostring(file) .. "' does not exist"  end
-    end]]--
+    end
     
     local id = filedata and ("@" .. callingWindow.file .. ":" .. file) or file
+    
     images[id] = love.graphics.newImage(filedata or file)
     return id
 end
 
 function image(img, x, y, width, height, color)
-    --if (not images[img]) and (callingWindow and not images["@" .. callingWindow.file .. ":" .. img]) then
-    if not images[img] then
+    if (not images[img]) and not (callingWindow and images["@" .. callingWindow.file .. ":" .. img]) then
+    --if not images[img] then
         local err
         img, err = importImage(img)
         if err then
             return
         end
+    end
+    
+    if callingWindow and images["@" .. callingWindow.file .. ":" .. img] then
+        img = "@" .. callingWindow.file .. ":" .. img
     end
     
     color = color or {1, 1, 1, 1}
