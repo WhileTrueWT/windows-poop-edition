@@ -135,14 +135,24 @@ local sounds = {}
 function importSound(file, type)
     if sounds[file] then return end
     
-    if not love.filesystem.getInfo(file) then return "ERROR: file '" .. tostring(file) .. "' does not exist"  end
+    local filedata
+    if callingWindow and callingWindow.resources and callingWindow.resources[file] then
+        filedata = callingWindow.resources[file]
+    else
+        if not love.filesystem.getInfo(file, "file") then return nil, "ERROR: file '" .. tostring(file) .. "' does not exist"  end
+    end
+    
+    local id = filedata and ("@" .. callingWindow.file .. ":" .. file) or file
     
     type = type or "static"
-    sounds[file] = love.audio.newSource(file, type)
+    sounds[id] = love.audio.newSource(filedata or file, type)
+    return id
 end
 
 function sound(s)
-    if not sounds[s] then importSound(s) end
+    if not sounds[s] then
+        s = importSound(s)
+    end
     
     love.audio.play(sounds[s])
 end
