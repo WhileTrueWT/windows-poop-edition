@@ -183,7 +183,7 @@ function openExe(file, arg)
     local data = love.filesystem.read(file)
     
     local magicNumber, pos = love.data.unpack("c2", data)
-    if not magicNumber == string.char(132, 248) then
+    if magicNumber ~= string.char(132, 248) then
         local err = string.format("%s is not a valid Windows PE application. (Magic number mismatch)", file)
         messageBox("Error", err, nil, "critical")
         return err
