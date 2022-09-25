@@ -189,7 +189,8 @@ function openExe(file, arg)
         return err
     end
     
-    local formatVersion, programName, programIcon, pos = love.data.unpack("zzz", data)
+    local formatVersion, programName, programIcon
+    formatVersion, programName, programIcon, pos = love.data.unpack("zzz", data, pos)
     local vMajor, vMinor, vPatch = string.match(formatVersion, "^(%d+).(%d+).(%d+)$") or function()
         
         local err = string.format("Error decoding '%s': misformatted version string", file)
