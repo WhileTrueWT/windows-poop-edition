@@ -20,7 +20,19 @@ local function packageExe()
         icon
     )
     
-    local files = love.filesystem.getDirectoryItems(dir)
+    local files = {}
+    
+    local function getFiles(d)
+        for _, file in ipairs(love.filesystem.getDirectoryItems(dir .. d)) do
+            if love.filesystem.getInfo(dir .. d .. file, "directory") then
+                getFiles(d .. file .. "/")
+            else
+                table.insert(files, d .. file)
+            end
+        end
+    end
+    
+    getFiles("")
     
     out = out .. love.data.pack("string", "T", #files)
     for _, file in ipairs(files) do
