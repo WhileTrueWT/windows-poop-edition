@@ -24,6 +24,7 @@ local items = {
     {"Visible Studio", "images/icons/visible-studio.png", function() openWindow("windows/visiblestudio.exe") end},
     {"UCanCode", "images/icons/code.png", function() openWindow("windows/ucancode.exe") end},
     {"Soundboard", "images/icons/soundboard.png", function() openWindow("windows/soundboard.exe") end},
+    {"Executable Packager", "images/icons/app.png", function() openWindow("windows/exepack.exe") end},
 }
 
 function window.load()
