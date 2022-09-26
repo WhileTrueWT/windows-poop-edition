@@ -36,7 +36,7 @@ function screen.draw()
     rect(0, 0, displayWidth, displayHeight, {0, 0, 0.5})
     setFont("fonts/DejaVuSansMono.ttf")
     love.graphics.scale(2)
-    text("Windows Poop Edition has suffered a horrible failiure and has crashed. Don't be alarmed; you knew this was going to happen.\n\nPress R to try to reload the desktop, or Shift+R to fully restart your computer.\n\nError description:\n" .. errcode .. "\n" .. traceback, 0, 0, {1, 1, 1}, displayWidth/2)
+    text("Windows Poop Edition has suffered a horrible failiure and has crashed. Don't be alarmed; you knew this was going to happen.\n\nPress R to try to reload the desktop, or Shift+R to fully restart your computer.\n\nError description:\n" .. errcode .. "\n\n" .. traceback, 0, 0, {1, 1, 1}, displayWidth/2)
     love.graphics.origin()
     love.graphics.setScissor()
 end
