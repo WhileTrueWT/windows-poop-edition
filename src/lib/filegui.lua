@@ -154,17 +154,17 @@ local function openFile(file)
     local ext = string.match(file, "%.(%w+)$") or ""
     local dir = string.match(file, "(.*/).*$") or ""
     if ext == "txt" then
-        openWindow("windows/notepad.lua", file)
+        openWindow("windows/notepad.exe", file)
     elseif ext == "png" or ext == "jpg" then
-        openWindow("windows/imageviewer.lua", file)
+        openWindow("windows/imageviewer.exe", file)
     elseif ext == "mp3" or ext == "wav" then
-        openWindow("windows/mediaplayer.lua", file)
+        openWindow("windows/mediaplayer.exe", file)
     elseif ext == "ogg" then
-        openWindow("windows/mediaplayer.lua", file)
+        openWindow("windows/mediaplayer.exe", file)
     elseif ext == "ucc" then
-        openWindow("windows/ucancode.lua", file)
+        openWindow("windows/ucancode.exe", file)
     elseif ext == "bf" then
-        openWindow("windows/bf.lua", file)
+        openWindow("windows/bf.exe", file)
     elseif ext == "lua" or ext == "exe" then
         if dir ~= "/windows/" then
             messageBox("Explorer", "WARNING: You are attempting to open a non-authorized program file. Doing this may have strange and/or damaging results. Are you sure?", {{"Yes", function() openWindow(file) end}, {"No", function() closeMessageBox() end}}, "exc")
@@ -172,12 +172,12 @@ local function openFile(file)
             openWindow(file)
         end
     elseif ext == "vurl" then
-        openWindow("windows/vurl.lua", file)
+        openWindow("windows/vurl.exe", file)
     elseif ext == "lnk" then
         local data = love.filesystem.read(file)
         openFile(data)
     elseif ext == "wpa" then
-        openWindow("windows/mediaplayer.lua", file)
+        openWindow("windows/mediaplayer.exe", file)
     else
         messageBox("Explorer", "Explorer does not know how to open '" .. ext .. "' files", nil, "exc")
     end

@@ -178,9 +178,7 @@ function switchScreen(id, arg)
     end
 end
 
--- once the new executable format works, and all/most existing programs are converted,
--- this shall become openWindow.
-function openExe(file, arg)
+function openWindow(file, arg)
     local targetFormatVersion = "0.0.0"
     local tMajor, tMinor, tPatch = string.match(targetFormatVersion, "^(%d+).(%d+).(%d+)$")
     
@@ -259,6 +257,8 @@ function openExe(file, arg)
     
     table.insert(openWindows, window)
     
+    callingWindow = window
+    
     local id = #openWindows
     window.id = id
     if openWindows[id].load then
@@ -271,6 +271,7 @@ function openExe(file, arg)
     showWindow(#openWindows)
 end
 
+--[[
 function openWindow(file, arg)
     local window, err = importWindow(file)
     if err then
@@ -296,7 +297,7 @@ function openWindow(file, arg)
         end
     end
     showWindow(#openWindows)
-end
+end]]
 
 --[[
 function openSubwindow(window)
@@ -393,7 +394,7 @@ function closeMessageBox()
 end
 
 function textInput(title, onfinish)
-    currentTextInputBox = {title=title, input="", onfinish=onfinish, type="text"}
+    currentTextInputBox = {title=title, input="", onfinish=onfinish, type="text", window=callingWindow}
 end
 
 function fileInput(onfinish, startdir)
@@ -401,7 +402,7 @@ function fileInput(onfinish, startdir)
         filegui.initFileList(path)
     end
     filegui.initFileList(startdir or "user/")
-    currentTextInputBox = {title="", input="", onfinish=onfinish, type="fileopen"}
+    currentTextInputBox = {title="", input="", onfinish=onfinish, type="fileopen", window=callingWindow}
 end
 
 function dirInput(onfinish, startdir)
@@ -411,7 +412,7 @@ function dirInput(onfinish, startdir)
         filegui.initFileList(path)
     end
     filegui.initFileList(startdir)
-    currentTextInputBox = {title="", input="", onfinish=onfinish, type="diropen", dir=startdir}
+    currentTextInputBox = {title="", input="", onfinish=onfinish, type="diropen", dir=startdir, window=callingWindow}
 end
 
 function fileSaveInput(onfinish, startdir)
@@ -419,7 +420,7 @@ function fileSaveInput(onfinish, startdir)
         filegui.initFileList(path)
     end
     filegui.initFileList(startdir or "user/")
-    currentTextInputBox = {title="", input="", onfinish=onfinish, type="filesave"}
+    currentTextInputBox = {title="", input="", onfinish=onfinish, type="filesave", window=callingWindow}
 end
 
 function open(onfinish, file, startdir)
@@ -451,6 +452,28 @@ function save(dest, content, ext, onfinish)
     else
         s(dest, content, ext)
     end
+end
+
+function getResource(path)
+    if callingWindow and callingWindow.resources and callingWindow.resources[path] then
+        return callingWindow.resources[path]
+    else
+        return nil
+    end
+end
+
+function loadLocalScript(path)
+    local filedata = getResource(path)
+    if not filedata then return end
+    
+    local ok, chunk = pcall(loadstring, filedata:getString(), filedata:getFilename())
+    
+    if not ok then
+        messageBox("Program Error", string.format("ERROR occured while loading local script '%s'\n%s", tostring(path), tostring(chunk)), nil, "critical")
+        return
+    end
+    
+    return chunk
 end
 
 function shutdown(restart)
@@ -1012,13 +1035,15 @@ function callbacks.keypressed(key)
         end
         
         if key == "return" then
-            if currentTextInputBox.onfinish then 
+            if currentTextInputBox.onfinish then
+                callingWindow = currentTextInputBox.window
                 local ok, msg = pcall(currentTextInputBox.onfinish, currentTextInputBox.input)
                 if not ok then
                     closeWindow()
                     messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}}, "critical")
                     return
                 end
+                callingWindow = nil
             end
             currentTextInputBox = nil
         end

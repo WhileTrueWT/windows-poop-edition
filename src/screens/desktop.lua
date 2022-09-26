@@ -19,7 +19,7 @@ function screen.load()
     love.mouse.setVisible(true)
     
     filegui.textShadow = true
-    filegui.cd = function(path) openWindow("windows/explorer.lua", path) end
+    filegui.cd = function(path) openWindow("windows/explorer.exe", path) end
     filegui.initFileList("/user/Desktop")
     
     t = 0
@@ -49,11 +49,11 @@ function screen.draw()
     filegui.drawFileList(10, 10, displayWidth, displayHeight-50, not (isWindowOpen() or isMessageBoxShowing() or isTextInputShowing()))
     image("images/gradient.png", 0, displayHeight-taskbarHeight, displayWidth, taskbarHeight, settings.themeColor)
     
-    button("", function() openWindow("windows/startmenu.lua") end, 0, displayHeight-taskbarHeight, 40, taskbarHeight, "images/logo.png", nil, false)
+    button("", function() openWindow("windows/startmenu.exe") end, 0, displayHeight-taskbarHeight, 40, taskbarHeight, "images/logo.png", nil, false)
     
     local ex = 50
     for id, w in ipairs(openWindows) do
-        if w.file ~= "windows/startmenu.lua" then
+        if w.file ~= "windows/startmenu.exe" then
             local title = w.title or ""
             local width = math.max(f:getWidth(title) + 50, 180)
             button(title, function() showWindow(id) end, ex, displayHeight-40, width, 40, nil, {1, 1, 1, 1}, nil, darkerColor)
