@@ -80,11 +80,11 @@ function window.draw()
     
     text("Icon: ", 5, 105)
     if icon then
-        image(icon, 5, 80, 30, 30)
+        image((dir or "") .. icon, 5, 80, 30, 30)
     end
     button("Select", function()
         fileInput(function(path)
-            icon = path
+            icon = string.match(path, "^" .. string.gsub((dir or ""), "(%W)", "%%%1") .. "(.*)") or path
         end, dir)
     end, 240, 105, 100, 40)
     

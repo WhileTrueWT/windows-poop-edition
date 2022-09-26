@@ -26,7 +26,7 @@ windowX, windowY, windowWidth, windowHeight = 0, 0, 0, 0
 
 local isDragging = false
 
-local callingWindow
+--local callingWindow
 
 stdin = ""
 stdout = ""
@@ -614,7 +614,8 @@ function importImage(file)
     if images[file] then return end
     
     local filedata
-    if callingWindow and callingWindow.resources and callingWindow.resources[file] then
+    
+    if (callingWindow and callingWindow.resources and callingWindow.resources[file]) then
         filedata = callingWindow.resources[file]
     else
         if not love.filesystem.getInfo(file, "file") then return nil, "ERROR: file '" .. tostring(file) .. "' does not exist"  end

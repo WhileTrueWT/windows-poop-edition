@@ -57,7 +57,9 @@ function screen.draw()
             local title = w.title or ""
             local width = math.max(f:getWidth(title) + 50, 180)
             button(title, function() showWindow(id) end, ex, displayHeight-40, width, 40, nil, {1, 1, 1, 1}, nil, darkerColor)
+            callingWindow = w
             image(w.icon or "images/icons/app.png", ex+5, displayHeight-30, 20, 20)
+            callingWindow = nil
             ex = ex + width
         end
     end
