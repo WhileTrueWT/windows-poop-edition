@@ -165,7 +165,7 @@ local function openFile(file)
         openWindow("windows/ucancode.exe", file)
     elseif ext == "bf" then
         openWindow("windows/bf.exe", file)
-    elseif ext == "lua" or ext == "exe" then
+    elseif ext == "exe" then
         if dir ~= "/windows/" then
             messageBox("Explorer", "WARNING: You are attempting to open a non-authorized program file. Doing this may have strange and/or damaging results. Are you sure?", {{"Yes", function() openWindow(file) end}, {"No", function() closeMessageBox() end}}, "exc")
         else
@@ -235,8 +235,10 @@ function m.drawFileList(xpos, ypos, w, h, cc, param)
                     icon = "images/icons/code.png"
                 elseif ext == "bf" then
                     icon = "images/icons/brainflip.png"
-                elseif ext == "lua" or ext == "exe" then
+                elseif ext == "exe" then
                     icon = "images/icons/app.png"
+                elseif ext == "lua" then
+                    icon = "images/icons/code.png"
                 elseif ext == "vurl" then
                     icon = "images/icons/vurl.png"
                 else
