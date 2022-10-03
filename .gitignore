@@ -1,4 +1,4 @@
-build.sh
+build-release.sh
 WindowsPoopEdition5.love
 winpe5-win
 love-win32
