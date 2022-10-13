@@ -26,17 +26,35 @@ function m.Gui:mousepressed(...)
 end
 
 function m.Gui:draw()
-    self.frame:draw(0, 0)
+    self.frame:draw()
 end
+
+-- Element
+
+Element = Object:extend()
+
+function Element:new(t)
+    self.x = 0
+    self.y = 0
+    self.width = t.width or 0
+    self.height = t.height or 0
+    self.marginX = t.marginX or 10
+    self.marginY = t.marginY or 10
+end
+
+function Element:draw() end
 
 -- Frame
 
-m.Frame = Object:extend()
+m.Frame = Element:extend()
 
 function m.Frame:new(t)
-    self.width = t.width or 100
-    self.height = t.height or 100
+    self.super.new(self, t)
     self.content = {}
+    self.x = 0
+    self.y = 0
+    self.marginX = 0
+    self.marginY = 0
 end
 
 function m.Frame:put(elements, params)
@@ -110,9 +128,9 @@ function m.Frame:mousepressed(x, y, button)
     end
 end
 
-function m.Frame:draw(x, y)
+function m.Frame:draw()
     love.graphics.push()
-    love.graphics.translate(x, y)
+    love.graphics.translate(self.x, self.y)
     
     for _, group in ipairs(self.content) do
         for _, element in ipairs(group.elements) do
@@ -124,21 +142,6 @@ function m.Frame:draw(x, y)
     
     love.graphics.pop()
 end
-
--- Element
-
-Element = Object:extend()
-
-function Element:new(t)
-    self.x = 0
-    self.y = 0
-    self.width = t.width or 0
-    self.height = t.height or 0
-    self.marginX = t.marginX or 10
-    self.marginY = t.marginY or 10
-end
-
-function Element:draw() end
 
 -- Text
 
