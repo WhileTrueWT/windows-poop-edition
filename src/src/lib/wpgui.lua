@@ -1,3 +1,4 @@
+local utf8 = require "utf8"
 local Object = require "lib.classic"
 
 local Element
@@ -17,16 +18,27 @@ function m.Gui:new(t)
     self.frame = t.frame or m.Frame{width = t.width, height = t.height}
 end
 
-function m.Gui:put(...)
-    self.frame:put(...)
+function m.Gui:put(elements, ...)
+    for _, element in ipairs(elements) do
+        element.gui = self
+    end
+    self.frame:put(elements, ...)
+end
+
+function m.Gui:draw()
+    self.frame:draw()
 end
 
 function m.Gui:mousepressed(...)
     self.frame:mousepressed(...)
 end
 
-function m.Gui:draw()
-    self.frame:draw()
+function m.Gui:keypressed(...)
+    self.frame:keypressed(...)
+end
+
+function m.Gui:textinput(...)
+    self.frame:textinput(...)
 end
 
 -- Element
@@ -43,6 +55,9 @@ function Element:new(t)
 end
 
 function Element:draw() end
+function Element:mousepressed() end
+function Element:keypressed() end
+function Element:textinput() end
 
 -- Frame
 
@@ -64,6 +79,10 @@ function m.Frame:put(elements, params)
     t.elements = elements
     t.align = params.align or "left"
     t.verticalAlign = params.verticalAlign or "center"
+    
+    for _, element in ipairs(t.elements) do
+        element.frame = self
+    end
     
     table.insert(self.content, t)
     self:computePositions()
@@ -117,13 +136,27 @@ function m.Frame:mousepressed(x, y, button)
     local mx, my = x - windowX, y - windowY
     for _, group in ipairs(self.content) do
         for _, element in ipairs(group.elements) do
-            print(mx, my, element.x, element.y, element.width, element.height)
-            if  (element.action) and (button == 1)
-            and element.x <= mx and mx <= element.x + element.width
+            if  element.x <= mx and mx <= element.x + element.width
             and element.y <= my and my <= element.y + element.height
             then
-                element:action()
+                element:mousepressed(x, y, button)
             end
+        end
+    end
+end
+
+function m.Frame:keypressed(key, scancode)
+    for _, group in ipairs(self.content) do
+        for _, element in ipairs(group.elements) do
+            element:keypressed(key, scancode)
+        end
+    end
+end
+
+function m.Frame:textinput(text)
+    for _, group in ipairs(self.content) do
+        for _, element in ipairs(group.elements) do
+            element:textinput(text)
         end
     end
 end
@@ -209,6 +242,93 @@ function m.Button:draw()
     end
     outline(self.x, self.y, self.width, self.height, self.outlineColor)
     text(self.label, self.x + self.width/2 - self.labelFont:getWidth(self.label)/2, self.y + self.height/2 - self.labelFont:getHeight()/2, self.labelColor)
+end
+
+function m.Button:mousepressed(x, y, button)
+    if button == 1 then
+        self:action()
+    end
+end
+
+-- Image
+
+m.Image = Element:extend()
+
+function m.Image:new(t)
+    self.file = t.file or ""
+    
+    self.super.new(self, {
+        width = t.width or self.loveImage:getWidth(),
+        height = t.height or self.loveImage:getHeight()
+    })
+end
+
+function m.Image:draw()
+    image(self.file, self.x, self.y, self.width, self.height)
+end
+
+-- TextBox
+
+m.TextBox = Element:extend()
+
+function m.TextBox:new(t)
+    self.value = ""
+    self.label = t.label or ""
+    self.color = t.color or {1, 1, 1, 1}
+    self.outlineColor = t.outlineColor or {0, 0, 0, 1}
+    self.textColor = t.textColor or style.text.color
+    self.labelColor = t.labelColor or {0.6, 0.6, 0.6, 1}
+    
+    self.onEnterPressed = t.onEnterPressed or function() end
+    
+    self.isActive = false
+    
+    self.super.new(self, {
+        width = t.width or 200,
+        height = t.height or 40
+    })
+end
+
+function m.TextBox:draw()
+    love.graphics.setColor(self.color)
+    love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
+    love.graphics.setColor(self.outlineColor)
+    love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
+    
+    if (not self.isActive) and (#self.value == 0) then
+        love.graphics.setColor(self.labelColor)
+        love.graphics.print(self.label, self.x + 10, self.y + 10)
+    else
+        local cursor = ""
+        if self.isActive then
+            cursor = ((math.floor(love.timer.getTime() * 2) % 2) == 0) and "_" or ""
+        end
+        love.graphics.setColor(self.textColor)
+        love.graphics.print(self.value .. cursor, self.x + 10, self.y + 10)
+    end
+    
+end
+
+function m.TextBox:mousepressed(x, y, button)
+    self.gui.activeTextBox = self
+    self.isActive = true
+end
+
+function m.TextBox:textinput(text)
+    self.value = self.value .. text
+end
+
+function m.TextBox:keypressed(key)
+    if key == "return" then
+        self.gui.activeTextBox = nil
+        self.isActive = false
+        self:onEnterPressed()
+    elseif key == "backspace" then
+        local byteoffset = utf8.offset(self.value, -1)
+        if byteoffset then
+            self.value = string.sub(self.value, 1, byteoffset - 1)
+        end
+    end
 end
 
 return m
