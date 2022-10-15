@@ -15,12 +15,26 @@ end
 m.Gui = Object:extend()
 
 function m.Gui:new(t)
-    self.frame = t.frame or m.Frame{width = t.width, height = t.height}
+    self.frame = t.frame or m.Frame{
+        width = t.width,
+        height = t.height,
+        marginX = 0,
+        marginY = 0,
+        outlineColor = {0, 0, 0, 0}
+    }
 end
 
 function m.Gui:put(elements, ...)
     for _, element in ipairs(elements) do
         element.gui = self
+        
+        if checkType(element, m.Frame) then
+            for _, group in ipairs(element.content) do
+                for _, element in ipairs(group.elements) do
+                    element.gui = self
+                end
+            end
+        end
     end
     self.frame:put(elements, ...)
 end
@@ -68,8 +82,8 @@ function m.Frame:new(t)
     self.content = {}
     self.x = 0
     self.y = 0
-    self.marginX = 0
-    self.marginY = 0
+    
+    self.outlineColor = t.outlineColor or {0, 0, 0, 1}
 end
 
 function m.Frame:put(elements, params)
@@ -89,7 +103,7 @@ function m.Frame:put(elements, params)
 end
 
 function m.Frame:computePositions()
-    local ex, ey = 0, 0
+    local ex, ey = self.x, self.y
     
     for _, group in ipairs(self.content) do
         local totalWidth = 0
@@ -124,10 +138,14 @@ function m.Frame:computePositions()
                 element.x = x
                 element.y = y
                 ex = ex + element.width + element.marginX*2
+                
+                if checkType(element, m.Frame) then
+                    element:computePositions()
+                end
             end
         end
         
-        ex = 0
+        ex = self.x
         ey = ey + totalHeight
     end
 end
@@ -162,8 +180,8 @@ function m.Frame:textinput(text)
 end
 
 function m.Frame:draw()
-    love.graphics.push()
-    love.graphics.translate(self.x, self.y)
+    love.graphics.setColor(self.outlineColor)
+    love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
     
     for _, group in ipairs(self.content) do
         for _, element in ipairs(group.elements) do
@@ -172,8 +190,6 @@ function m.Frame:draw()
             end
         end
     end
-    
-    love.graphics.pop()
 end
 
 -- Text
@@ -185,9 +201,11 @@ function m.Text:new(t)
     self.font = t.font or love.graphics.getFont()
     self.color = t.color or style.text.color
     
+    local width = t.width or self.font:getWidth(self.text)
+    local height = t.height or self.font:getHeight() * #(select(2, self.font:getWrap(self.text, width)))
     self.super.new(self, {
-        width = t.width or self.font:getWidth(self.text),
-        height = t.height or self.font:getHeight()
+        width = width,
+        height = height
     })
 end
 
