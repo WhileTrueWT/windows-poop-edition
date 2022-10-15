@@ -337,14 +337,16 @@ function m.TextBox:textinput(text)
 end
 
 function m.TextBox:keypressed(key)
-    if key == "return" then
-        self.gui.activeTextBox = nil
-        self.isActive = false
-        self:onEnterPressed()
-    elseif key == "backspace" then
-        local byteoffset = utf8.offset(self.value, -1)
-        if byteoffset then
-            self.value = string.sub(self.value, 1, byteoffset - 1)
+    if self.isActive then
+        if key == "return" then
+            self.gui.activeTextBox = nil
+            self.isActive = false
+            self:onEnterPressed()
+        elseif key == "backspace" then
+            local byteoffset = utf8.offset(self.value, -1)
+            if byteoffset then
+                self.value = string.sub(self.value, 1, byteoffset - 1)
+            end
         end
     end
 end
