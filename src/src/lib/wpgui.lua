@@ -238,7 +238,12 @@ function m.Button:draw()
     local brightnessOffset = 0
     
     local mx, my = love.graphics.inverseTransformPoint(love.mouse.getX(), love.mouse.getY())
-    if self.x <= mx and mx <= self.x + self.width and self.y <= my and my <= self.y + self.height then
+    if  self.x <= mx
+        and mx <= self.x + self.width
+        and self.y <= my
+        and my <= self.y + self.height
+        and not love.mouse.isDown(1)
+    then
         brightnessOffset = 0.1
     else
         brightnessOffset = 0
