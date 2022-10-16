@@ -335,6 +335,7 @@ end
 function m.TextBox:mousepressed(x, y, button)
     self.gui.activeTextBox = self
     self.isActive = true
+    love.keyboard.setKeyRepeat(true)
 end
 
 function m.TextBox:textinput(text)
@@ -346,6 +347,7 @@ function m.TextBox:keypressed(key)
         if key == "return" then
             self.gui.activeTextBox = nil
             self.isActive = false
+            love.keyboard.setKeyRepeat(false)
             self:onEnterPressed()
         elseif key == "backspace" then
             local byteoffset = utf8.offset(self.value, -1)
