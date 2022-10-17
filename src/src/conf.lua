@@ -4,6 +4,7 @@
 
 function love.conf(t)
     t.identity = "winpe4"
+    t.version = "11.4"
     t.window.title = "Windows Poop Edition 5"
     t.window.icon = "icon.png"
     t.window.fullscreen = true
