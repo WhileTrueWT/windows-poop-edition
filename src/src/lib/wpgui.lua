@@ -311,6 +311,24 @@ function m.Image:draw()
     image(self.file, self.x, self.y, self.width, self.height)
 end
 
+-- Canvas
+
+m.Canvas = Element:extend()
+
+function m.Canvas:new(t)
+    self.super.new(self, t)
+    self.draw = t.draw and (function()
+        love.graphics.push()
+        local gx, gy = love.graphics.transformPoint(self.x, self.y)
+        love.graphics.setScissor(gx, gy, self.width, self.height)
+        love.graphics.translate(self.x, self.y)
+        
+        t.draw()
+        
+        love.graphics.pop()
+    end) or function() end
+end
+
 -- TextBox
 
 m.TextBox = Element:extend()

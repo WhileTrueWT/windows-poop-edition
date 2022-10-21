@@ -29,6 +29,14 @@ function window.load()
     frame:put({textBox}, {align = "left"})
     
     mainGui:put({image, frame}, {align = "left"})
+    
+    local canvas = gui.Canvas{width = 400, height = 200, draw = function()
+        love.graphics.clear(0, 0, 0, 1)
+        love.graphics.setColor(1, 0, 0, 1)
+        love.graphics.rectangle("fill", math.sin(love.timer.getTime())*100 + 150, math.cos(love.timer.getTime())*50 + 50, 100, 100)
+    end}
+    
+    mainGui:put({canvas}, {align = "center"})
 end
 
 function window.draw()
