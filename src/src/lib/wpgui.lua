@@ -83,6 +83,13 @@ function m.Frame:new(t)
     self.x = 0
     self.y = 0
     
+    if t.width then
+        self.hasFixedWidth = true
+    end
+    if t.height then
+        self.hasFixedHeight = true
+    end
+    
     self.outlineColor = t.outlineColor or {0, 0, 0, 1}
 end
 
@@ -104,6 +111,8 @@ end
 
 function m.Frame:computePositions()
     local ex, ey = self.x, self.y
+    local totalFrameWidth = 0
+    local totalFrameHeight = 0
     
     for _, group in ipairs(self.content) do
         local totalWidth = 0
@@ -117,6 +126,11 @@ function m.Frame:computePositions()
                 totalHeight = height
             end
         end
+        
+        if totalWidth > totalFrameWidth then
+            totalFrameWidth = totalWidth
+        end
+        totalFrameHeight = totalFrameHeight + totalHeight
         
         if group.align == "left" then
         elseif group.align == "right" then
@@ -132,7 +146,7 @@ function m.Frame:computePositions()
                 
                 if group.verticalAlign == "top" then
                 elseif group.verticalAlign == "center" then
-                    y = y + totalHeight/2 - element.height/2
+                    y = y + totalHeight/2 - (element.height + element.marginY*2)/2
                 end
                 
                 element.x = x
@@ -147,6 +161,13 @@ function m.Frame:computePositions()
         
         ex = self.x
         ey = ey + totalHeight
+    end
+    
+    if not self.hasFixedWidth then
+        self.width = totalFrameWidth
+    end
+    if not self.hasFixedHeight then
+        self.height = totalFrameHeight
     end
 end
 

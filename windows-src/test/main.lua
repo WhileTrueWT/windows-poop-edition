@@ -8,7 +8,7 @@ function window.load()
     mainGui = gui.Gui{width = windowWidth, height = windowHeight}
     
     local image = gui.Image{file = "img.png", width = 200, height = 200}
-    local frame = gui.Frame{width = 550, height = 400}
+    local frame = gui.Frame{}
     
     local text = gui.Text{text = "hello"}
     local button = gui.Button{label = "click", action = function()
