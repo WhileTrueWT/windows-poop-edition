@@ -317,7 +317,7 @@ m.Canvas = Element:extend()
 
 function m.Canvas:new(t)
     self.super.new(self, t)
-    self.draw = t.draw and (function()
+    self.draw = t.draw and (function(self)
         love.graphics.push()
         local gx, gy = love.graphics.transformPoint(self.x, self.y)
         love.graphics.setScissor(gx, gy, self.width, self.height)

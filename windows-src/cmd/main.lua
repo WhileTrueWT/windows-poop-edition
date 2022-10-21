@@ -50,7 +50,7 @@ Note: To type a space as part of an argument, you must type an underscore (_) in
             end
         end
         
-        local err = openWindow("windows/" .. args[1] .. ".lua", args[2])
+        local err = openWindow("windows/" .. args[1] .. ".exe", args[2])
         if err then print(err) end
         return
     end
