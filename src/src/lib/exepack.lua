@@ -1,3 +1,6 @@
+local formatVersion = "0.0.0"
+local magicNumber = string.char(132, 248)
+
 local m = {}
 
 function m.package(t)

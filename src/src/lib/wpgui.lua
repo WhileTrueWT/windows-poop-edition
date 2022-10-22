@@ -397,4 +397,28 @@ function m.TextBox:keypressed(key)
     end
 end
 
+-- CheckBox
+
+m.CheckBox = Element:extend()
+
+function m.CheckBox:new(t)
+    self.value = t.value or false
+    
+    self.onToggle = t.onToggle or function() end
+    
+    self.super.new(self, {
+        width = 30,
+        height = 30
+    })
+end
+
+function m.CheckBox:draw()
+    image(self.value and "images/check.png" or "images/uncheck.png", self.x, self.y, self.width, self.height)
+end
+
+function m.CheckBox:mousepressed()
+    self.value = not self.value
+    self.onToggle(self.value)
+end
+
 return m
