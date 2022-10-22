@@ -63,7 +63,7 @@ Note: To type a space as part of an argument, you must type an underscore (_) in
     if cmd == "list" then
         print("List of available programs:")
         for _, p in ipairs(love.filesystem.getDirectoryItems("windows")) do
-            local m = string.match(p, "(.+)%.lua")
+            local m = string.match(p, "(.+)%.exe")
             if m then
                 print(m)
             end
