@@ -251,7 +251,7 @@ function m.Button:new(t)
     
     self.super.new(self, {
         width = t.width or self.labelFont:getWidth(self.label) + 40,
-        height = t.height or 40
+        height = t.height or 30
     })
 end
 
@@ -347,7 +347,7 @@ function m.TextBox:new(t)
     
     self.super.new(self, {
         width = t.width or 200,
-        height = t.height or 40
+        height = t.height or 30
     })
 end
 
@@ -359,14 +359,14 @@ function m.TextBox:draw()
     
     if (not self.isActive) and (#self.value == 0) then
         love.graphics.setColor(self.labelColor)
-        love.graphics.print(self.label, self.x + 10, self.y + 10)
+        love.graphics.print(self.label, self.x + 5, self.y + 5)
     else
         local cursor = ""
         if self.isActive then
             cursor = ((math.floor(love.timer.getTime() * 2) % 2) == 0) and "_" or ""
         end
         love.graphics.setColor(self.textColor)
-        love.graphics.print(self.value .. cursor, self.x + 10, self.y + 10)
+        love.graphics.print(self.value .. cursor, self.x + 5, self.y + 5)
     end
     
 end
