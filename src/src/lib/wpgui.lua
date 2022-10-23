@@ -414,6 +414,16 @@ end
 
 function m.CheckBox:draw()
     image(self.value and "images/check.png" or "images/uncheck.png", self.x, self.y, self.width, self.height)
+    
+    local mx, my = love.graphics.inverseTransformPoint(love.mouse.getX(), love.mouse.getY())
+    if  self.x <= mx
+        and mx <= self.x + self.width
+        and self.y <= my
+        and my <= self.y + self.height
+        and not love.mouse.isDown(1)
+    then
+        rect(self.x, self.y, self.width, self.height, {1, 1, 1, 0.2})
+    end
 end
 
 function m.CheckBox:mousepressed()
