@@ -365,8 +365,16 @@ function m.TextBox:draw()
         if self.isActive then
             cursor = ((math.floor(love.timer.getTime() * 2) % 2) == 0) and "_" or ""
         end
+        
+        local s = self.value
+        local f = love.graphics.getFont()
+        local pos = f:getWidth(s) <= self.width and 0 or 0 - f:getWidth(s) + (self.width - 10)
+        
+        local sx, sy = love.graphics.transformPoint(self.x, self.y)
+        love.graphics.setScissor(sx, sy, self.width, self.height)
         love.graphics.setColor(self.textColor)
-        love.graphics.print(self.value .. cursor, self.x + 5, self.y + 5)
+        love.graphics.print(self.value .. cursor, self.x + 5 + pos, self.y + 5)
+        love.graphics.setScissor()
     end
     
 end
