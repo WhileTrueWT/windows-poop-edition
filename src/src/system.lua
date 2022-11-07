@@ -334,7 +334,17 @@ function closeWindow(id, force)
     table.remove(openWindows, id)
     
     if #openWindows > 0 then
-        currentWindow = #openWindows
+        local i = #openWindows
+        
+        while i > 0 and not openWindows[i].isActive do
+            i = i - 1
+        end
+        
+        if i < 1 then
+            currentWindow = nil
+        else
+            currentWindow = i
+        end
     else
         currentWindow = nil
     end
