@@ -325,6 +325,7 @@ function m.Canvas:new(t)
         
         t.draw()
         
+        love.graphics.setScissor()
         love.graphics.pop()
     end) or function() end
 end
@@ -334,21 +335,25 @@ end
 m.TextBox = Element:extend()
 
 function m.TextBox:new(t)
-    self.value = ""
-    self.label = t.label or ""
-    self.color = t.color or {1, 1, 1, 1}
-    self.outlineColor = t.outlineColor or {0, 0, 0, 1}
-    self.textColor = t.textColor or style.text.color
-    self.labelColor = t.labelColor or {0.6, 0.6, 0.6, 1}
-    
-    self.onEnterPressed = t.onEnterPressed or function() end
-    
-    self.isActive = false
-    
     self.super.new(self, {
         width = t.width or 200,
         height = t.height or 30
     })
+    
+    self.value = ""
+    self.label = t.label or ""
+    self.multiline = t.multiline or false
+    self.color = t.color or {1, 1, 1, 1}
+    self.outlineColor = t.outlineColor or {0, 0, 0, 1}
+    self.textColor = t.textColor or style.text.color
+    self.labelColor = t.labelColor or {0.6, 0.6, 0.6, 1}
+    self.font = t.font or love.graphics.getFont()
+    
+    self.onEnterPressed = t.onEnterPressed or function() end
+    
+    self.isActive = false
+    self.lines = self.multiline and {""}
+    self.currentLine = self.lines and 1
 end
 
 function m.TextBox:draw()
@@ -356,6 +361,8 @@ function m.TextBox:draw()
     love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
     love.graphics.setColor(self.outlineColor)
     love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
+    
+    love.graphics.setFont(self.font)
     
     if (not self.isActive) and (#self.value == 0) then
         love.graphics.setColor(self.labelColor)
@@ -380,27 +387,46 @@ function m.TextBox:draw()
 end
 
 function m.TextBox:mousepressed(x, y, button)
+    if self.gui.activeTextBox then
+        self.gui.activeTextBox.isActive = false
+    end
     self.gui.activeTextBox = self
     self.isActive = true
     love.keyboard.setKeyRepeat(true)
 end
 
 function m.TextBox:textinput(text)
-    self.value = self.value .. text
+    if self.isActive then
+        if self.multiline then
+            self.lines[self.currentLine] = self.lines[self.currentLine] .. text
+            self.value = table.concat(self.lines, "\n")
+        else
+            self.value = self.value .. text
+        end
+    end
 end
 
 function m.TextBox:keypressed(key)
     if self.isActive then
         if key == "return" then
-            self.gui.activeTextBox = nil
-            self.isActive = false
-            love.keyboard.setKeyRepeat(false)
-            self:onEnterPressed()
+            if multiline then
+                table.insert(self.lines, self.currentLine+1, "")
+                self.currentLine = self.currentLine + 1
+            else
+                self.gui.activeTextBox = nil
+                self.isActive = false
+                love.keyboard.setKeyRepeat(false)
+                self:onEnterPressed()
+            end
         elseif key == "backspace" then
             local byteoffset = utf8.offset(self.value, -1)
             if byteoffset then
                 self.value = string.sub(self.value, 1, byteoffset - 1)
             end
+        elseif multiline and key == "up" and self.currentLine > 1 then
+            self.currentLine = self.currentLine - 1
+        elseif multiline and key == "down" and self.currentLine < #self.lines then
+            self.currentLine = self.currentLine + 1
         end
     end
 end
