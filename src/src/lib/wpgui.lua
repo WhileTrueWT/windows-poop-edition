@@ -355,6 +355,7 @@ function m.TextBox:new(t)
     self.lines = self.multiline and {""}
     self.currentLine = self.lines and 1
     self.currentPos = 0
+    self.scroll = 1
 end
 
 function m.TextBox:draw()
@@ -377,27 +378,31 @@ function m.TextBox:draw()
         local s = self.value
         local f = love.graphics.getFont()
         local pos = f:getWidth(s) <= self.width and 0 or 0 - f:getWidth(s) + (self.width - 10)
+        local scroll = -((self.scroll-1) * f:getHeight())
         
         local sx, sy = love.graphics.transformPoint(self.x, self.y)
         love.graphics.setScissor(sx, sy, self.width, self.height)
         love.graphics.setColor(self.textColor)
         
         if self.multiline then
-            for i, line in ipairs(self.lines) do
-                love.graphics.print(
-                    (i == self.currentLine) and
-                        string.sub(line, 1, self.currentPos)
-                        .. cursor
-                        .. string.sub(line, self.currentPos + 1)
-                    or line,
-                self.x + 5 + pos, self.y + 5 + (i-1)*f:getHeight())
+            for i = self.scroll, self.scroll + math.ceil(self.height / f:getHeight()) do
+                local line = self.lines[i]
+                if line then
+                    love.graphics.print(
+                        (i == self.currentLine) and
+                            string.sub(line, 1, self.currentPos)
+                            .. cursor
+                            .. string.sub(line, self.currentPos + 1)
+                        or line,
+                    self.x + 5 + pos, self.y + 5 + scroll + (i-1)*f:getHeight())
+                end
             end
         else
             love.graphics.print(
                 string.sub(self.value, 1, self.currentPos)
                 .. cursor
                 .. string.sub(self.value, self.currentPos + 1),
-            self.x + 5 + pos, self.y + 5)
+            self.x + 5 + pos, self.y + 5 + scroll)
         end
         
         love.graphics.setScissor()
@@ -489,6 +494,14 @@ function m.TextBox:keypressed(key)
             self.currentLine = self.currentLine + 1
             if self.currentPos > #self.lines[self.currentLine] then
                 self.currentPos = #self.lines[self.currentLine]
+            end
+        end
+        
+        if self.multiline then
+            if self.currentLine < self.scroll then
+                self.scroll = self.scroll - 1
+            elseif self.currentLine > self.scroll-1 + math.floor((self.height-10) / self.font:getHeight()) then
+                self.scroll = self.scroll + 1
             end
         end
     end
