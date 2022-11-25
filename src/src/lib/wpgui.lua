@@ -354,6 +354,7 @@ function m.TextBox:new(t)
     self.isActive = false
     self.lines = self.multiline and {""}
     self.currentLine = self.lines and 1
+    self.currentPos = 0
 end
 
 function m.TextBox:draw()
@@ -370,7 +371,7 @@ function m.TextBox:draw()
     else
         local cursor = ""
         if self.isActive then
-            cursor = ((math.floor(love.timer.getTime() * 2) % 2) == 0) and "_" or ""
+            cursor = ((math.floor(love.timer.getTime() * 2) % 2) == 0) and "_" or " "
         end
         
         local s = self.value
@@ -380,7 +381,25 @@ function m.TextBox:draw()
         local sx, sy = love.graphics.transformPoint(self.x, self.y)
         love.graphics.setScissor(sx, sy, self.width, self.height)
         love.graphics.setColor(self.textColor)
-        love.graphics.print(self.value .. cursor, self.x + 5 + pos, self.y + 5)
+        
+        if self.multiline then
+            for i, line in ipairs(self.lines) do
+                love.graphics.print(
+                    (i == self.currentLine) and
+                        string.sub(line, 1, self.currentPos)
+                        .. cursor
+                        .. string.sub(line, self.currentPos + 1)
+                    or line,
+                self.x + 5 + pos, self.y + 5 + (i-1)*f:getHeight())
+            end
+        else
+            love.graphics.print(
+                string.sub(self.value, 1, self.currentPos)
+                .. cursor
+                .. string.sub(self.value, self.currentPos + 1),
+            self.x + 5 + pos, self.y + 5)
+        end
+        
         love.graphics.setScissor()
     end
     
@@ -398,37 +417,85 @@ end
 function m.TextBox:textinput(text)
     if self.isActive then
         if self.multiline then
-            self.lines[self.currentLine] = self.lines[self.currentLine] .. text
-            self.value = table.concat(self.lines, "\n")
+            self.lines[self.currentLine] = string.sub(self.lines[self.currentLine], 1, self.currentPos) .. text .. string.sub(self.lines[self.currentLine], self.currentPos+1)
+            self:updateValue()
         else
-            self.value = self.value .. text
+            self.value = string.sub(self.value, 1, self.currentPos) .. text .. string.sub(self.value, self.currentPos+1)
         end
+        self.currentPos = self.currentPos + 1
     end
 end
 
 function m.TextBox:keypressed(key)
     if self.isActive then
         if key == "return" then
-            if multiline then
-                table.insert(self.lines, self.currentLine+1, "")
+            if self.multiline then
+                table.insert(self.lines, self.currentLine+1, string.sub(self.lines[self.currentLine], self.currentPos+1))
+                self.lines[self.currentLine] = string.sub(self.lines[self.currentLine], 1, self.currentPos)
                 self.currentLine = self.currentLine + 1
+                self.currentPos = 0
+                self:updateValue()
             else
                 self.gui.activeTextBox = nil
                 self.isActive = false
                 love.keyboard.setKeyRepeat(false)
                 self:onEnterPressed()
             end
+        
         elseif key == "backspace" then
-            local byteoffset = utf8.offset(self.value, -1)
-            if byteoffset then
-                self.value = string.sub(self.value, 1, byteoffset - 1)
+            if self.multiline then
+                local byteoffset = utf8.offset(self.lines[self.currentLine], -1, self.currentPos+1)
+                if byteoffset then
+                    self.lines[self.currentLine] = string.sub(self.lines[self.currentLine], 1, byteoffset - 1) .. string.sub(self.lines[self.currentLine], byteoffset+1)
+                    self.currentPos = self.currentPos - 1
+                elseif self.currentLine > 1 then
+                    local line = table.remove(self.lines, self.currentLine)
+                    self.currentLine = self.currentLine - 1
+                    self.currentPos = #self.lines[self.currentLine]
+                    self.lines[self.currentLine] = self.lines[self.currentLine] .. line
+                end
+                self:updateValue()
+            else
+                local byteoffset = utf8.offset(self.value, -1, self.currentPos+1)
+                if byteoffset then
+                    self.value = string.sub(self.value, 1, byteoffset - 1) .. string.sub(self.value, byteoffset+1)
+                    self.currentPos = self.currentPos - 1
+                end
             end
-        elseif multiline and key == "up" and self.currentLine > 1 then
+        
+        elseif key == "left" then
+            if self.multiline and self.currentPos == 0 and self.currentLine > 1 then
+                self.currentLine = self.currentLine - 1
+                self.currentPos = #self.lines[self.currentLine]
+            elseif self.currentPos > 0 then
+                self.currentPos = self.currentPos - 1
+            end
+        
+        elseif key == "right" then
+            if self.multiline and self.currentPos == #self.lines[self.currentLine] and self.currentLine < #self.lines then
+                self.currentLine = self.currentLine + 1
+                self.currentPos = 0
+            elseif self.currentPos < #(self.multiline and self.lines[self.currentLine] or self.value) then
+                self.currentPos = self.currentPos + 1
+            end
+        
+        elseif self.multiline and key == "up" and self.currentLine > 1 then
             self.currentLine = self.currentLine - 1
-        elseif multiline and key == "down" and self.currentLine < #self.lines then
+            if self.currentPos > #self.lines[self.currentLine] then
+                self.currentPos = #self.lines[self.currentLine]
+            end
+        
+        elseif self.multiline and key == "down" and self.currentLine < #self.lines then
             self.currentLine = self.currentLine + 1
+            if self.currentPos > #self.lines[self.currentLine] then
+                self.currentPos = #self.lines[self.currentLine]
+            end
         end
     end
+end
+
+function m.TextBox:updateValue()
+    self.value = table.concat(self.lines, "\n")
 end
 
 -- CheckBox

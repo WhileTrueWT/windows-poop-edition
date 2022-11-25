@@ -46,7 +46,7 @@ function window.load()
         end
     end}
     
-    local multiline = gui.TextBox{multiline = true, label = "Type stuff!"}
+    local multiline = gui.TextBox{multiline = true, label = "Type stuff!", height = 160}
     
     mainGui:put({canvas, multiline}, {align = "center"})
 end
