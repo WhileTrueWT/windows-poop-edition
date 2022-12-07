@@ -222,12 +222,10 @@ function m.Text:new(t)
     self.font = t.font or love.graphics.getFont()
     self.color = t.color or style.text.color
     
-    local width = t.width or self.font:getWidth(self.text)
-    local height = t.height or self.font:getHeight() * #(select(2, self.font:getWrap(self.text, width)))
-    self.super.new(self, {
-        width = width,
-        height = height
-    })
+    t.width = t.width or self.font:getWidth(self.text)
+    t.height = t.height or self.font:getHeight() * #(select(2, self.font:getWrap(self.text, t.width)))
+    
+    self.super.new(self, t)
 end
 
 function m.Text:draw()
@@ -249,10 +247,10 @@ function m.Button:new(t)
     self.labelColor = t.labelColor or style.button.textColor
     self.labelFont = t.labelFont or love.graphics:getFont()
     
-    self.super.new(self, {
-        width = t.width or self.labelFont:getWidth(self.label) + 40,
-        height = t.height or 30
-    })
+    t.width = t.width or self.labelFont:getWidth(self.label) + 40
+    t.height = t.height or 30
+    
+    self.super.new(self, t)
 end
 
 function m.Button:draw()
@@ -301,10 +299,10 @@ m.Image = Element:extend()
 function m.Image:new(t)
     self.file = t.file or ""
     
-    self.super.new(self, {
-        width = t.width or self.loveImage:getWidth(),
-        height = t.height or self.loveImage:getHeight()
-    })
+    t.width = t.width or self.loveImage:getWidth()
+    t.height = t.height or self.loveImage:getHeight()
+    
+    self.super.new(self, t)
 end
 
 function m.Image:draw()
@@ -335,10 +333,10 @@ end
 m.TextBox = Element:extend()
 
 function m.TextBox:new(t)
-    self.super.new(self, {
-        width = t.width or 200,
-        height = t.height or 30
-    })
+    t.width = t.width or 200
+    t.height = t.height or 30
+    
+    self.super.new(self, t)
     
     self.value = ""
     self.label = t.label or ""
@@ -355,7 +353,8 @@ function m.TextBox:new(t)
     self.lines = self.multiline and {""}
     self.currentLine = self.lines and 1
     self.currentPos = 0
-    self.scroll = 1
+    self.scrollX = 1
+    self.scrollY = 1
 end
 
 function m.TextBox:draw()
@@ -377,15 +376,15 @@ function m.TextBox:draw()
         
         local s = self.value
         local f = love.graphics.getFont()
-        local pos = f:getWidth(s) <= self.width and 0 or 0 - f:getWidth(s) + (self.width - 10)
-        local scroll = -((self.scroll-1) * f:getHeight())
+        local scrollX = -(f:getWidth(string.sub(self.multiline and self.lines[self.currentLine] or self.value, 1, self.scrollX)))
+        local scrollY = -((self.scrollY-1) * f:getHeight())
         
         local sx, sy = love.graphics.transformPoint(self.x, self.y)
         love.graphics.setScissor(sx, sy, self.width, self.height)
         love.graphics.setColor(self.textColor)
         
         if self.multiline then
-            for i = self.scroll, self.scroll + math.ceil(self.height / f:getHeight()) do
+            for i = self.scrollY, self.scrollY + math.ceil(self.height / f:getHeight()) do
                 local line = self.lines[i]
                 if line then
                     love.graphics.print(
@@ -394,7 +393,7 @@ function m.TextBox:draw()
                             .. cursor
                             .. string.sub(line, self.currentPos + 1)
                         or line,
-                    self.x + 5 + pos, self.y + 5 + scroll + (i-1)*f:getHeight())
+                    self.x + 5 + scrollX, self.y + 5 + scrollY + (i-1)*f:getHeight())
                 end
             end
         else
@@ -402,7 +401,7 @@ function m.TextBox:draw()
                 string.sub(self.value, 1, self.currentPos)
                 .. cursor
                 .. string.sub(self.value, self.currentPos + 1),
-            self.x + 5 + pos, self.y + 5 + scroll)
+            self.x + 5 + scrollX, self.y + 5 + scrollY)
         end
         
         love.graphics.setScissor()
@@ -439,6 +438,7 @@ function m.TextBox:keypressed(key)
                 self.lines[self.currentLine] = string.sub(self.lines[self.currentLine], 1, self.currentPos)
                 self.currentLine = self.currentLine + 1
                 self.currentPos = 0
+                self.scrollX = 1
                 self:updateValue()
             else
                 self.gui.activeTextBox = nil
@@ -489,21 +489,45 @@ function m.TextBox:keypressed(key)
             if self.currentPos > #self.lines[self.currentLine] then
                 self.currentPos = #self.lines[self.currentLine]
             end
+            self.scrollX = 1
         
         elseif self.multiline and key == "down" and self.currentLine < #self.lines then
             self.currentLine = self.currentLine + 1
             if self.currentPos > #self.lines[self.currentLine] then
                 self.currentPos = #self.lines[self.currentLine]
             end
+            self.scrollX = 1
+        end
+        
+        if self.currentPos < self.scrollX then
+            self.scrollX = self.scrollX - 1
+        elseif self.font:getWidth(
+            string.sub(
+                self.multiline and self.lines[self.currentLine] or self.value,
+                self.scrollX, self.currentPos
+            )
+        ) > self.width-10 then
+            self.scrollX = self.scrollX + 1
         end
         
         if self.multiline then
-            if self.currentLine < self.scroll then
-                self.scroll = self.scroll - 1
-            elseif self.currentLine > self.scroll-1 + math.floor((self.height-10) / self.font:getHeight()) then
-                self.scroll = self.scroll + 1
+            if self.currentLine < self.scrollY then
+                self.scrollY = self.scrollY - 1
+            elseif self.currentLine > self.scrollY-1 + math.floor((self.height-10) / self.font:getHeight()) then
+                self.scrollY = self.scrollY + 1
             end
         end
+    end
+end
+
+function m.TextBox:setValue(value)
+    self.value = value
+    if self.multiline then
+        local lines = {}
+        for line in string.gmatch(value, "([^\n]*)\n?") do
+            table.insert(lines, line)
+        end
+        self.lines = lines
     end
 end
 
@@ -520,10 +544,10 @@ function m.CheckBox:new(t)
     
     self.onToggle = t.onToggle or function() end
     
-    self.super.new(self, {
-        width = 30,
-        height = 30
-    })
+    t.width = t.width or 30
+    t.height = t.height or 30
+    
+    self.super.new(self, t)
 end
 
 function m.CheckBox:draw()

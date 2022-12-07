@@ -38,6 +38,7 @@ function print(...)
     stdout = stdout .. "\n"
 end
 
+
 -- STYLE
 
 style = {}
@@ -261,6 +262,14 @@ function openWindow(file, arg)
     
     local id = #openWindows
     window.id = id
+    
+    window.windowWidth = window.windowWidth or 720
+    window.windowHeight = window.windowHeight or 480
+    window.windowX = window.windowX or (displayWidth / 2 - window.windowWidth / 2) + (id-1) * 40
+    window.windowY = window.windowY or (displayHeight / 2 - window.windowHeight / 2) + (id-1) * 40
+    
+    windowX, windowY, windowWidth, windowHeight = window.windowX, window.windowY, window.windowWidth, window.windowHeight
+    
     if openWindows[id].load then
         local ok, msg = pcall(openWindows[id].load, arg)
         if not ok then
@@ -268,7 +277,8 @@ function openWindow(file, arg)
             messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
         end
     end
-    showWindow(#openWindows)
+    
+    showWindow(id)
 end
 
 --[[
@@ -359,10 +369,6 @@ function showWindow(id)
     local window = openWindows[currentWindow]   
        
     window.isActive = true
-    window.windowWidth = window.windowWidth or 720
-    window.windowHeight = window.windowHeight or 480
-    window.windowX = window.windowX or (displayWidth / 2 - window.windowWidth / 2) + (id-1) * 40
-    window.windowY = window.windowY or (displayHeight / 2 - window.windowHeight / 2) + (id-1) * 40
 end
 
 function hideWindow(id)

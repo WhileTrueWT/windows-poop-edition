@@ -22,7 +22,7 @@ function window.load()
         button,
     }, {align = "center"})
     
-    local text1 = gui.Text{text = "I keep forgetting this test program is public. perhaps one day there will be Windows PE enthusiasts sifting through git history and coming across this. in which case, hi.", width = 450}
+    local text1 = gui.Text{text = "Humanity's present understanding of aviation dictates that bees should lack any ability to fly, given their small wings in contrast to their fat little bodies. And yet, bees still fly.", width = 450}
     frame:put({text1}, {align = "left"})
     
     local textBox = gui.TextBox{label = "test!", onEnterPressed = function(self)
