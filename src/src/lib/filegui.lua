@@ -165,7 +165,7 @@ local function openFile(file)
         openWindow("windows/ucancode.exe", file)
     elseif ext == "bf" then
         openWindow("windows/bf.exe", file)
-    elseif ext == "exe" then
+    elseif ext == "exe" or ext == "lua" then
         if dir ~= "/windows/" then
             messageBox("Explorer", "WARNING: You are attempting to open a non-authorized program file. Doing this may have strange and/or damaging results. Are you sure?", {{"Yes", function() openWindow(file) end}, {"No", function() closeMessageBox() end}}, "exc")
         else
