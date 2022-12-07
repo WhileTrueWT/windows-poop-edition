@@ -3,7 +3,7 @@
 -- but this feels more complete okay
 
 function love.conf(t)
-    t.identity = "winpe4"
+    t.identity = "winpe5"
     t.window.title = "Windows Poop Edition 5"
     t.window.icon = "icon.png"
     t.window.fullscreen = true
