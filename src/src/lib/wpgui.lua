@@ -353,7 +353,7 @@ function m.TextBox:new(t)
     self.lines = self.multiline and {""}
     self.currentLine = self.lines and 1
     self.currentPos = 0
-    self.scrollX = 1
+    self.scrollX = 0
     self.scrollY = 1
 end
 
@@ -438,7 +438,7 @@ function m.TextBox:keypressed(key)
                 self.lines[self.currentLine] = string.sub(self.lines[self.currentLine], 1, self.currentPos)
                 self.currentLine = self.currentLine + 1
                 self.currentPos = 0
-                self.scrollX = 1
+                self.scrollX = 0
                 self:updateValue()
             else
                 self.gui.activeTextBox = nil
@@ -489,14 +489,14 @@ function m.TextBox:keypressed(key)
             if self.currentPos > #self.lines[self.currentLine] then
                 self.currentPos = #self.lines[self.currentLine]
             end
-            self.scrollX = 1
+            self.scrollX = 0
         
         elseif self.multiline and key == "down" and self.currentLine < #self.lines then
             self.currentLine = self.currentLine + 1
             if self.currentPos > #self.lines[self.currentLine] then
                 self.currentPos = #self.lines[self.currentLine]
             end
-            self.scrollX = 1
+            self.scrollX = 0
         end
         
         if self.currentPos < self.scrollX then
