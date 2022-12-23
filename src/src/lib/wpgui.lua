@@ -90,10 +90,14 @@ function m.Frame:new(t)
         self.hasFixedHeight = true
     end
     
+    self.color = t.color or {0, 0, 0, 0}
     self.outlineColor = t.outlineColor or {0, 0, 0, 1}
 end
 
 function m.Frame:put(elements, params)
+    if type(elements) ~= "table" then
+        elements = {elements}
+    end
     params = params or {}
     
     local t = {}
@@ -201,6 +205,9 @@ function m.Frame:textinput(text)
 end
 
 function m.Frame:draw()
+    love.graphics.setColor(self.color)
+    love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)    
+    
     love.graphics.setColor(self.outlineColor)
     love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
     
