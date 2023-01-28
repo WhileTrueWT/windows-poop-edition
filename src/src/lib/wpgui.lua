@@ -60,12 +60,13 @@ end
 Element = Object:extend()
 
 function Element:new(t)
-    self.x = 0
-    self.y = 0
+    self.x = t.x or 0
+    self.y = t.y or 0
     self.width = t.width or 0
     self.height = t.height or 0
     self.marginX = t.marginX or 10
     self.marginY = t.marginY or 10
+	self.hasFreePosition = t.x ~= nil and t.y ~= nil
 end
 
 function Element:draw() end
@@ -123,12 +124,14 @@ function m.Frame:computePositions()
         local totalHeight = 0
         
         for _, element in ipairs(group.elements) do
-            totalWidth = totalWidth + element.width + element.marginX*2
-            
-            local height = element.height + element.marginY*2
-            if height > totalHeight then
-                totalHeight = height
-            end
+			if not element.hasFreePosition then
+				totalWidth = totalWidth + element.width + element.marginX*2
+				
+				local height = element.height + element.marginY*2
+				if height > totalHeight then
+					totalHeight = height
+				end
+			end
         end
         
         if totalWidth > totalFrameWidth then
@@ -144,7 +147,9 @@ function m.Frame:computePositions()
         end
         
         for _, element in ipairs(group.elements) do
-            if checkType(element, Element) then
+            if checkType(element, Element)
+			and not element.hasFreePosition
+			then
                 
                 local x, y = ex + element.marginX, ey + element.marginY
                 

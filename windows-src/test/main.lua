@@ -49,6 +49,11 @@ function window.load()
     local multiline = gui.TextBox{multiline = true, label = "Type stuff!", height = 160}
     
     mainGui:put({canvas, multiline}, {align = "center"})
+	
+	local freeButton = gui.Button{label = "I'm free!", x = 50, y = 35, action = function(self)
+		self.x = self.x + 5
+	end}
+	mainGui:put{freeButton}
 end
 
 function window.draw()
