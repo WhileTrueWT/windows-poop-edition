@@ -200,7 +200,7 @@ end
 function window.load()
     cdir = ""
     stdin = ""
-    stdout = "CrapOS Windows Poop Edition 5 - " .. systemVersion .."\n\"\"©\"\"2017-2022\n"
+    stdout = "CrapOS Windows Poop Edition 5 - " .. systemVersion .."\n\"\"©\"\"2017-2023\n"
     scroll = 0
     t = 0
 end
