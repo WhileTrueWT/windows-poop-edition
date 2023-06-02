@@ -725,7 +725,7 @@ function button(t, onclick, x, y, width, height, color, textColor, line, tint)
         rect(x, y, width, height, newColor)
     end
     if line then outline(x, y, width, height, style.button.outlineColor) end
-    text(t, x + width/2 - f:getWidth(t)/2, y + height/2 - f:getHeight()/2, textColor)
+    text(t, math.floor(x + width/2 - f:getWidth(t)/2), math.floor(y + height/2 - f:getHeight()/2), textColor)
 end
 
 -- SCREENS
