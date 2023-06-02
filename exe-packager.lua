@@ -32,7 +32,7 @@ for s in string.gmatch(itemstr, "([^\0]+)") do
     table.insert(files, s)
 end
 
-out = out .. string.pack("T", #files)
+out = out .. string.pack("<I8", #files)
 for _, file in ipairs(files) do
     out = out .. string.pack("z", file)
 end
@@ -42,7 +42,7 @@ for _, file in ipairs(files) do
     local data = f:read("*a")
     f:close()
     
-    out = out .. string.pack("s", data)
+    out = out .. string.pack("s8", data)
 end
 out = out .. "\0"
 

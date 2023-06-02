@@ -30,14 +30,14 @@ function m.package(t)
     
     getFiles("")
     
-    out = out .. love.data.pack("string", "T", #files)
+    out = out .. love.data.pack("string", "<I8", #files)
     for _, file in ipairs(files) do
         out = out .. love.data.pack("string", "z", file)
     end
     
     for _, file in ipairs(files) do
         local data = love.filesystem.read(dir .. file)
-        out = out .. love.data.pack("string", "s", data)
+        out = out .. love.data.pack("string", "s8", data)
     end
     out = out .. "\0"
     

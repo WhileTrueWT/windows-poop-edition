@@ -31,6 +31,8 @@ local isDragging = false
 stdin = ""
 stdout = ""
 
+-- this thing is really stupid and a possibly bad idea by past me
+-- but i'll deal with it later (never)
 function print(...)
     for _, v in ipairs({...}) do
         stdout = stdout .. tostring(v) .. "\t"
@@ -221,7 +223,7 @@ function openWindow(file, arg)
     
     local resnames = {}
     local rescount
-    rescount, pos = love.data.unpack("T", data, pos)
+    rescount, pos = love.data.unpack("<I8", data, pos)
     
     for _ = 1, rescount do
         local name
@@ -233,7 +235,7 @@ function openWindow(file, arg)
     local resources = {}    
     for _, name in ipairs(resnames) do
         local s
-        s, pos = love.data.unpack("s", data, pos)
+        s, pos = love.data.unpack("s8", data, pos)
         resources[name] = love.filesystem.newFileData(s, name)
     end
     
@@ -729,7 +731,6 @@ function button(t, onclick, x, y, width, height, color, textColor, line, tint)
 end
 
 -- SCREENS
--- each screen will contain functions for love callbacks such as load, update, draw
 
 local arg
 
@@ -755,7 +756,6 @@ local function importScreen(file)
 end
 
 -- WINDOWS
--- similar to screens, but they display on top of the current screen
 
 function importWindow(file)
     local window = {}
@@ -805,7 +805,6 @@ function windowDec(window, id)
 end
 
 -- MESSAGE BOX
--- like windows, but have their own separate layer, and limited in functionality
 
 local messageX, messageY, messageWidth, messageHeight
 
