@@ -37,7 +37,7 @@ function m.package(t)
     
     for _, file in ipairs(files) do
         local data = love.filesystem.read(dir .. file)
-        out = out .. love.data.pack("string", "s8", data)
+        out = out .. love.data.pack("string", "<s8", data)
     end
     out = out .. "\0"
     

@@ -42,7 +42,7 @@ for _, file in ipairs(files) do
     local data = f:read("*a")
     f:close()
     
-    out = out .. string.pack("s8", data)
+    out = out .. string.pack("<s8", data)
 end
 out = out .. "\0"
 
