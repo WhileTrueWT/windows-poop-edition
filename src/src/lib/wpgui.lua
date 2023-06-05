@@ -261,12 +261,30 @@ function m.Button:new(t)
     
     t.width = t.width or self.labelFont:getWidth(self.label) + 40
     t.height = t.height or 30
+	
+	if type(self.color) == "string" then
+		self.color = love.graphics.newImage(self.color)
+	end
     
     self.super.new(self, t)
 end
 
 function m.Button:draw()
     local brightnessOffset = 0
+    
+    if type(self.color) == "table" then
+		love.graphics.setColor(self.color)
+		love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
+    elseif self.color.typeOf and self.color:typeOf "Image" then
+        love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.draw(
+			self.color,
+			self.x, self.y,
+			nil,
+			self.width / self.color:getWidth(),
+			self.height / self.color:getHeight()
+		)
+    end
     
     local mx, my = love.graphics.inverseTransformPoint(love.mouse.getX(), love.mouse.getY())
     if  self.x <= mx
@@ -275,27 +293,18 @@ function m.Button:draw()
         and my <= self.y + self.height
         and not love.mouse.isDown(1)
     then
-        brightnessOffset = 0.1
-    else
-        brightnessOffset = 0
+		love.graphics.setColor(1, 1, 1, 0.2)
+		love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
     end
-    
-    local newColor
-    
-    if type(self.color) == "string" then
-        if brightnessOffset > 0 then
-            newColor = {1, 1, 1, 0.25}
-        else
-            newColor = {0, 0, 0, 0}
-        end
-        image(self.color, self.x, self.y, self.width, self.height, self.tint)
-        rect(self.x, self.y, self.width, self.height, newColor)
-    else
-        newColor = {self.color[1] + brightnessOffset, self.color[2] + brightnessOffset, self.color[3] + brightnessOffset, self.color[4]}
-        rect(self.x, self.y, self.width, self.height, newColor)
-    end
-    outline(self.x, self.y, self.width, self.height, self.outlineColor)
-    text(self.label, self.x + self.width/2 - self.labelFont:getWidth(self.label)/2, self.y + self.height/2 - self.labelFont:getHeight()/2, self.labelColor)
+	
+    love.graphics.setColor(self.outlineColor)
+	love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
+	
+    love.graphics.print(
+		self.label,
+		math.floor(self.x + self.width/2 - self.labelFont:getWidth(self.label)/2),
+		math.floor(self.y + self.height/2 - self.labelFont:getHeight()/2)
+	)
 end
 
 function m.Button:mousepressed(x, y, button)
