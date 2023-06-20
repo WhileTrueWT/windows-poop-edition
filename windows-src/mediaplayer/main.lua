@@ -44,6 +44,10 @@ local function decodeWPA(s)
     return soundData
 end
 
+local function formatTime(seconds)
+	return string.format("%d:%02d", math.floor(seconds/60), seconds%60)
+end
+
 function window.load(file)
     f = nil
     
@@ -95,10 +99,10 @@ function window.draw()
         love.graphics.draw(sound, 5, 20, nil, videoWidth/sound:getWidth(), videoHeight/sound:getHeight())
         love.graphics.translate(0, videoHeight + 30)
     end
-    text(math.floor(sound:tell()), 0, 15)
+    text(formatTime(math.floor(sound:tell())), 0, 15)
     rect(50, 15, windowWidth-100, 15, {0, 0, 0})
     rect(50, 15, (windowWidth-100) * sound:tell() / dur, 15, {0, 0.75, 0})
-    text(math.floor(dur), windowWidth-40, 15)
+    text(formatTime(math.floor(dur)), windowWidth-40, 15)
     button("<<", function() sound:seek(sound:tell() >= 5 and sound:tell() - 5 or 0) end, 5, 40, 50, 40)
     button(sound:isPlaying() and "Pause" or "Play", function() if sound:isPlaying() then sound:pause() else sound:play() end end, 65, 40, 50, 40)
     button(">>", function()
