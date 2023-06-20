@@ -133,13 +133,13 @@ function window.draw()
         
         if op then
             if op == "+" then
-                x = x + y
+                x = y + x
             elseif op == "-" then
-                x = x - y
+                x = y - x
             elseif op == "*" then
-                x = x * y
+                x = y * x
             elseif op == "/" then
-                x = x / y
+				x = y / x
             end
         end
         
