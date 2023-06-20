@@ -74,6 +74,35 @@ function love.quit()
     if not ok then drawErr(msg) end
 end
 
+function love.errorhandler(msg)
+	love.audio.stop()
+	love.mouse.setVisible(false)
+	
+	local traceback = debug.traceback()
+	
+	print(string.format("%s\n%s", msg, traceback))
+	
+	local buttonpressed
+	
+	local function showmsg(hasCopied)
+		buttonpressed = love.window.showMessageBox(
+			"Error",
+			string.format("A very strange and unusual error has occured.\n\n%s\n\n%s", msg, traceback),
+			{"OK", hasCopied and "Copied!" or "Copy Error", enterbutton = 1},
+			"error"
+		)
+		
+		if buttonpressed == 1 then
+			return
+		elseif buttonpressed == 2 then
+			love.system.setClipboardText(string.format("%s\n%s", msg, traceback))
+			showmsg(true)
+		end
+	end
+	
+	showmsg()
+end
+
 local ok, chunk = pcall(love.filesystem.load, "system.lua")
 if ok then
     local ok, msg = pcall(chunk)
