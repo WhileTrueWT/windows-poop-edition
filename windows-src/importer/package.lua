@@ -1,4 +1,4 @@
 return {
-    name = "Importer",
-    icon = "download.png",
+	name = "Importer",
+	icon = "download.png",
 }

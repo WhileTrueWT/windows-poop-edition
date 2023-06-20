@@ -1,4 +1,4 @@
 return {
-    name = "Windows Media Player",
-    icon = "speaker.png",
+	name = "Windows Media Player",
+	icon = "speaker.png",
 }

@@ -1,4 +1,4 @@
 return {
-    name = "Notepad",
-    icon = "icon.png",
+	name = "Notepad",
+	icon = "icon.png",
 }

@@ -7,6 +7,6 @@ local page = ...
 local status, body = https.request(page)
 
 love.thread.getChannel("https"):push{
-    status = status,
-    body = body
+	status = status,
+	body = body
 }

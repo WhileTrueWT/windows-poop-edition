@@ -1,4 +1,4 @@
 return {
-    name = "About Windows",
-    icon = "info.png",
+	name = "About Windows",
+	icon = "info.png",
 }

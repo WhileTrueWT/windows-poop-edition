@@ -1,4 +1,4 @@
 return {
-    name = "Command Prompt",
-    icon = "cmd.png",
+	name = "Command Prompt",
+	icon = "cmd.png",
 }

@@ -8,40 +8,40 @@ local cdir
 local filelist
 
 local function refresh()
-    filegui.initFileList(cdir)
+	filegui.initFileList(cdir)
 end
 
 local function cd(dir)
-    if dir == ".." then
-        cdir = string.match(cdir, "(/?.+/).+/$") or "/"
-    else
-        cdir = dir .. "/"
-    end
-    refresh()
+	if dir == ".." then
+		cdir = string.match(cdir, "(/?.+/).+/$") or "/"
+	else
+		cdir = dir .. "/"
+	end
+	refresh()
 end
 
 local function operationError(msg)
-    msg = msg or ""
-    messageBox("Explorer", "Operation failed.\n" .. msg, nil, "critical")
+	msg = msg or ""
+	messageBox("Explorer", "Operation failed.\n" .. msg, nil, "critical")
 end
 
 local function selectFile(i)
-    filelist[i].selected = not filelist[i].selected
+	filelist[i].selected = not filelist[i].selected
 end
 
 function window.load(arg)
-    filelist = {}
-    filegui.cd = cd
-    filegui.selectFile = selectFile
-    cdir = arg or "/user"
-    cd(cdir)
+	filelist = {}
+	filegui.cd = cd
+	filegui.selectFile = selectFile
+	cdir = arg or "/user"
+	cd(cdir)
 end
 
 function window.draw()
-    text(cdir, 5, 5)
-    button("Up", function() cd("..") end, 5, 20, 60, 30)
-    
-    filegui.drawFileList(5, 60, windowWidth, windowHeight)
+	text(cdir, 5, 5)
+	button("Up", function() cd("..") end, 5, 20, 60, 30)
+	
+	filegui.drawFileList(5, 60, windowWidth, windowHeight)
 end
 
 return window

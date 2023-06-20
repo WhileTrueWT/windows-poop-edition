@@ -1,4 +1,4 @@
 return {
-    name = "Internet Explorer",
-    icon = "ie.png",
+	name = "Internet Explorer",
+	icon = "ie.png",
 }

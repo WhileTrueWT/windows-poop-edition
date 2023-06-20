@@ -1,4 +1,4 @@
 return {
-    name = "Brainflip",
-    icon = "brainflip.png",
+	name = "Brainflip",
+	icon = "brainflip.png",
 }

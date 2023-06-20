@@ -1,4 +1,4 @@
 return {
-    name = "PEChat",
-    icon = "chat.png",
+	name = "PEChat",
+	icon = "chat.png",
 }

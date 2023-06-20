@@ -1,4 +1,4 @@
 return {
-    name = "FNAF: Secureness Beach",
-    icon = nil,
+	name = "FNAF: Secureness Beach",
+	icon = nil,
 }

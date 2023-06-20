@@ -1,4 +1,4 @@
 return {
-    name = "Start Menu",
-    icon = nil,
+	name = "Start Menu",
+	icon = nil,
 }

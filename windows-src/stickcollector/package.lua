@@ -1,4 +1,4 @@
 return {
-    name = "Stick Collector",
-    icon = "stick.png",
+	name = "Stick Collector",
+	icon = "stick.png",
 }

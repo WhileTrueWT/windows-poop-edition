@@ -1,4 +1,4 @@
 return {
-    name = "Visible Studio",
-    icon = "visible-studio.png",
+	name = "Visible Studio",
+	icon = "visible-studio.png",
 }

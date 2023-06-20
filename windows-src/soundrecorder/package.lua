@@ -1,4 +1,4 @@
 return {
-    name = "Sound Recorder",
-    icon = "soundrecorder.png",
+	name = "Sound Recorder",
+	icon = "soundrecorder.png",
 }

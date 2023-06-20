@@ -1,4 +1,4 @@
 return {
-    name = "Executable Packager",
-    icon = nil,
+	name = "Executable Packager",
+	icon = nil,
 }

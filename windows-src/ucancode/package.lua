@@ -1,4 +1,4 @@
 return {
-    name = "UCanCode",
-    icon = "code.png",
+	name = "UCanCode",
+	icon = "code.png",
 }

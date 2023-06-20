@@ -1,4 +1,4 @@
 return {
-    name = "Image Viewer",
-    icon = "picture.png",
+	name = "Image Viewer",
+	icon = "picture.png",
 }

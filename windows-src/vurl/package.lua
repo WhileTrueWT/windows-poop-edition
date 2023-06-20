@@ -1,4 +1,4 @@
 return {
-    name = "Vurl",
-    icon = "vurl.png",
+	name = "Vurl",
+	icon = "vurl.png",
 }
