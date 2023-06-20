@@ -4,6 +4,8 @@ local hasFinished
 local copiedSize = 0
 local currentDir = ""
 
+local bodyColor = {1, 1, 1, 1}
+
 local function determineDirSize(dir)
     local size = 0
     for _, item in ipairs(love.filesystem.getDirectoryItems(dir)) do
@@ -58,8 +60,10 @@ function love.load()
     
     isInstalling = false
     hasFinished = false
-    love.graphics.setBackgroundColor(0.95, 0.95, 0.95)
     love.graphics.setNewFont(16)
+	
+	setupbg = love.graphics.newImage("setupbg.png")
+	logo = love.graphics.newImage("logo.png")
 end
 
 function love.update()
@@ -73,15 +77,40 @@ function love.update()
 end
 
 function love.draw()
+	local width, height = love.graphics.getDimensions()
+	local bodyWidth = width*0.6
+	local bodyHeight = height*0.6
+	local bodyLeft = width/2 - bodyWidth/2
+	local bodyTop = height/2 - bodyHeight/2
+	
+	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.draw(setupbg, 0, 0, nil, width/setupbg:getWidth(), height/setupbg:getHeight())
+	
+	love.graphics.setColor(bodyColor)
+	love.graphics.rectangle('fill', bodyLeft, bodyTop, bodyWidth, bodyHeight)
+	
+	love.graphics.translate(bodyLeft, bodyTop)
+	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.draw(logo, 10, 10)
+	love.graphics.translate(0, logo:getHeight()+10)
+	
     love.graphics.setColor(0.1, 0.1, 0.1)
     
     if not isInstalling and not hasFinished then
     
-        love.graphics.printf("Welcome to the Windows Poop Edition 5 installer. This program will prepare your computer for the wonderful world of Windows PE!\n\nPress any key to begin installing...", 10, 10, love.graphics.getWidth()-20)
+        love.graphics.printf(
+			"Welcome to the Windows Poop Edition 5 installer. This program will prepare your computer for the wonderful world of Windows PE!\n\nPress any key to begin installing...",
+			10, 10,
+			bodyWidth-20
+		)
     
     elseif hasFinished then
         
-        love.graphics.printf("Windows Poop Edition has installed successfully, I think. Now you can experience this OS's wonderful technologies!\n\nPress any key to reboot into Windows PE...", 10, 10, love.graphics.getWidth()-20)
+        love.graphics.printf(
+			"Windows Poop Edition has installed successfully, I think. Now you can experience this OS's wonderful technologies!\n\nPress any key to reboot into Windows PE...",
+			10, 10,
+			love.graphics.getWidth()-20
+		)
     
     else
         
