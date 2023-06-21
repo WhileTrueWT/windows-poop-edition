@@ -4,7 +4,6 @@ local errcode
 local traceback
 
 function screen.load(msg)
-	error "lol"
 	love.audio.stop()
 	love.mouse.setVisible(false)
 	t = -100
