@@ -7,7 +7,7 @@ local function drawErr(msg)
 	love.audio.stop()
 	love.mouse.setVisible(false)
 	
-	if switchScreen then
+	if switchScreen and currentScreen ~= crashScreen then
 		switchScreen("screens/crash.lua", tostring(msg))
 	else
 		love.draw = nil

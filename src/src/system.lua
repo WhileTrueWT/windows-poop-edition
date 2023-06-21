@@ -171,12 +171,22 @@ function switchScreen(id, arg)
 	
 	openWindows = {}
 	
+	local prevScreen = currentScreen
 	currentScreen = id
 	if screens[currentScreen].load then
 		local ok, msg = pcall(screens[currentScreen].load, arg)
-		if not ok and currentScreen ~= crashScreen then
-			switchScreen(crashScreen, msg)
-			return
+		if not ok then
+			if currentScreen ~= crashScreen then
+				switchScreen(crashScreen, msg)
+				return
+			else
+				currentScreen = prevScreen
+				love.window.showMessageBox(
+					"Crash Failure",
+					"The system has failed to crash because the crash screen has an error. How ironic.\n\n" .. msg,
+					"error"
+				)
+			end
 		end
 	end
 end
@@ -586,8 +596,12 @@ end
 
 local function callScreen(func, ...)
 	local ok, msg = pcall(func, ...)
-	if not ok and currentScreen ~= crashScreen then
-		switchScreen(crashScreen, msg)
+	if not ok then 
+		if currentScreen ~= crashScreen then
+			switchScreen(crashScreen, msg)
+		else
+			error(msg)
+		end
 	end
 end
 
@@ -741,14 +755,22 @@ local function importScreen(file)
 	
 	local ok, chunk, result
 	ok, chunk = pcall(love.filesystem.load, file)
-	if not ok and file ~= crashScreen then
-		startingScreen = crashScreen
-		arg = chunk
+	if not ok then 
+		if file ~= crashScreen then
+			startingScreen = crashScreen
+			arg = chunk
+		else
+			error(chunk)
+		end
 	else
 		ok, result = pcall(chunk)
-		if not ok and file ~= crashScreen then
-			startingScreen = crashScreen
-			arg = result
+		if not ok then 
+			if file ~= crashScreen then
+				startingScreen = crashScreen
+				arg = result
+			else
+				error(result)
+			end
 		else
 			screens[file] = result
 		end
