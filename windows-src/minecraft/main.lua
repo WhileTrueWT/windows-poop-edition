@@ -140,6 +140,7 @@ local player = {}
 local inventory = {}
 local inventorySelection
 local canJump
+local playerSize = 0.8
 
 local function checkCollision(x1,y1,w1,h1, x2,y2,w2,h2)
   return x1 < x2+w2 and
@@ -151,7 +152,7 @@ end
 local function checkPlayerCollision()
 	for x=math.floor(player.x)-1, math.floor(player.x)+1 do
 		for y=math.floor(player.y)-1, math.floor(player.y)+1 do
-			if world.map[x] and world.map[x][y] and world.map[x][y].type ~= "air" and checkCollision(player.x, player.y, 0.8, 0.8, x, y, 1, 1) then
+			if world.map[x] and world.map[x][y] and world.map[x][y].type ~= "air" and checkCollision(player.x, player.y, playerSize, playerSize, x, y, 1, 1) then
 				return true
 			end
 		end
@@ -288,7 +289,7 @@ function screens.game.draw()
 		end
 	end
 	
-	rect(player.x, player.y, 0.8, 0.8, {0.5, 0, 1, 1})
+	rect(player.x, player.y, playerSize, playerSize, {0.5, 0, 1, 1})
 	
 	love.graphics.pop()
 	
@@ -316,8 +317,8 @@ function screens.game.mousepressed(x, y, button)
 				inventory[blockTypeOrder[inventorySelection]] > 0
 				and world.map[lx][ly].type == "air"
 				and not (
-					(lx == math.floor(player.x) or lx == math.floor(player.x+1))
-					and (ly == math.floor(player.y) or ly == math.floor(player.y+1))
+					(lx == math.floor(player.x) or lx == math.floor(player.x+playerSize))
+					and (ly == math.floor(player.y) or ly == math.floor(player.y+playerSize))
 				)
 			then
 				world.map[lx][ly].type = blockTypeOrder[inventorySelection]
