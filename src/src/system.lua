@@ -1124,6 +1124,11 @@ function callbacks.filedropped(file)
 	end
 end
 
+function callbacks.resize(width, height)
+	displayWidth = width
+	displayHeight = height
+end
+
 function callbacks.update(dt)
 	t = t + dt
 	if screens[currentScreen] and screens[currentScreen].update then

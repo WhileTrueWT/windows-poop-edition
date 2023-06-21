@@ -59,6 +59,11 @@ function love.filedropped(file)
 	if not ok then drawErr(msg) end
 end
 
+function love.resize(width, height)
+	local ok, msg = pcall(callbacks.resize, width, height)
+	if not ok then drawErr(msg) end
+end
+
 function love.update(dt)
 	local ok, msg = pcall(callbacks.update, dt)
 	if not ok then drawErr(msg) end
