@@ -1074,6 +1074,8 @@ end
 function callbacks.keypressed(key)
 	if key == "f4" then
 		love.window.setFullscreen(not love.window.getFullscreen())
+		displayWidth = love.graphics.getWidth()
+		displayHeight = love.graphics.getHeight()
 	end
 
 	if currentTextInputBox then
