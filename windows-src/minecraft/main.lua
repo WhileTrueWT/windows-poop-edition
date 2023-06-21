@@ -312,7 +312,14 @@ function screens.game.mousepressed(x, y, button)
 				world.map[lx][ly].type = "air"
 			end
 		elseif button == 2 then
-			if inventory[blockTypeOrder[inventorySelection]] > 0 and world.map[lx][ly].type == "air" then
+			if
+				inventory[blockTypeOrder[inventorySelection]] > 0
+				and world.map[lx][ly].type == "air"
+				and not (
+					(lx == math.floor(player.x) or lx == math.floor(player.x+1))
+					and (ly == math.floor(player.y) or ly == math.floor(player.y+1))
+				)
+			then
 				world.map[lx][ly].type = blockTypeOrder[inventorySelection]
 				inventory[blockTypeOrder[inventorySelection]] = inventory[blockTypeOrder[inventorySelection]] - 1
 			end
