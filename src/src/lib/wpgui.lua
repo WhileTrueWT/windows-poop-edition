@@ -56,8 +56,15 @@ function m.Gui:draw()
 	end
 end
 
-function m.Gui:mousepressed(...)
-	self.frame:mousepressed(...)
+function m.Gui:mousepressed(x, y, button)
+	self.frame:mousepressed(x, y, button)
+	
+	if self.dropdownPopup then
+		local mx, my = x - windowX, y - windowY
+		if isPointInRect(mx, my, self.dropdownPopup.x, self.dropdownPopup.y, self.dropdownPopup.width, self.dropdownPopup.height) then
+			self.dropdownPopup:mousepressed(x, y, button)
+		end
+	end
 end
 
 function m.Gui:keypressed(...)
@@ -606,6 +613,7 @@ function m.Dropdown:new(t)
 	self.options = t.options or {}
 	self.selection = t.selection or 1
 	self.value = self.options[self.selection]
+	self.onSelect = t.onSelect or function() end
 	self.isOpen = false
 	
 	self.width = t.width or 160
@@ -677,14 +685,16 @@ DropdownPopup = Object:extend()
 function DropdownPopup:new(t)
 	self.dropdown = t.dropdown
 	self.x = self.dropdown.x
-	self.y = self.dropdown.y
+	self.y = self.dropdown.y + self.dropdown.height
 	self.itemWidth = self.dropdown.width
 	self.itemHeight = 30
+	self.width = self.itemWidth
+	self.height = self.itemHeight * #self.dropdown.options
 end
 
 function DropdownPopup:draw()
 	for i, option in ipairs(self.dropdown.options) do
-		local y = self.y + self.dropdown.height + (i-1)*self.itemHeight
+		local y = self.y + (i-1)*self.itemHeight
 		love.graphics.setColor(self.dropdown.menuColor)
 		love.graphics.rectangle('fill', self.x, y, self.itemWidth, self.itemHeight)
 		love.graphics.setColor(self.dropdown.outlineColor)
@@ -692,6 +702,22 @@ function DropdownPopup:draw()
 		
 		love.graphics.setColor(self.dropdown.textColor)
 		love.graphics.print(option, self.x + 5, y + 5)
+	end
+end
+
+function DropdownPopup:mousepressed(x, y, button)
+	local my = y - windowY
+	
+	if button == 1 then
+		local selection = math.floor((my - self.y) / self.itemHeight) + 1
+		if selection >= 1 and selection <= #self.dropdown.options then		-- safeguard, I suppose.
+			self.dropdown.selection = selection
+			self.dropdown.value = self.dropdown.options[self.dropdown.selection]
+			self.dropdown.onSelect(self.dropdown.value)
+			
+			self.dropdown.isOpen = false
+			self.dropdown.gui.dropdownPopup = nil
+		end
 	end
 end
 
