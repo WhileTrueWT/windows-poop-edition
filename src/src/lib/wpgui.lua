@@ -294,7 +294,7 @@ function m.Button:draw()
 	
 	local mx, my = love.graphics.inverseTransformPoint(love.mouse.getX(), love.mouse.getY())
 	if
-		isPointInRect(mx, my. self.x, self.y, self.width, self.height)
+		isPointInRect(mx, my, self.x, self.y, self.width, self.height)
 		and not love.mouse.isDown(1)
 	then
 		love.graphics.setColor(1, 1, 1, 0.2)
