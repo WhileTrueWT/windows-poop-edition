@@ -30,6 +30,7 @@ function m.Gui:new(t)
 		marginY = 0,
 		outlineColor = {0, 0, 0, 0}
 	}
+	self.dropdownPopup = nil
 end
 
 function m.Gui:put(elements, ...)
@@ -49,6 +50,10 @@ end
 
 function m.Gui:draw()
 	self.frame:draw()
+	
+	if self.dropdownPopup then
+		self.dropdownPopup:draw()
+	end
 end
 
 function m.Gui:mousepressed(...)
@@ -595,6 +600,7 @@ end
 -- Dropdown
 
 m.Dropdown = Element:extend()
+local DropdownPopup
 
 function m.Dropdown:new(t)
 	self.super.new(self, t)
@@ -606,14 +612,40 @@ function m.Dropdown:new(t)
 	
 	self.width = t.width or 160
 	self.height = t.height or 30
-	self.color = t.color or {1, 1, 1, 1}
-	self.outlineColor = t.outlineColor or {0, 0, 0, 1}
+	self.color = t.color or style.button.color
+	self.outlineColor = t.outlineColor or style.button.outlineColor
 	self.textColor = t.textColor or style.text.color
+	self.menuColor = t.menuColor or {1, 1, 1, 1}
+	
+	if type(self.color) == "string" then
+		self.color = love.graphics.newImage(self.color)
+	end
 end
 
 function m.Dropdown:draw()
-	love.graphics.setColor(self.color)
-	love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
+	if type(self.color) == "table" then
+		love.graphics.setColor(self.color)
+		love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
+	elseif self.color.typeOf and self.color:typeOf "Image" then
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.draw(
+			self.color,
+			self.x, self.y,
+			nil,
+			self.width / self.color:getWidth(),
+			self.height / self.color:getHeight()
+		)
+	end
+	
+	local mx, my = love.graphics.inverseTransformPoint(love.mouse.getX(), love.mouse.getY())
+	if
+		isPointInRect(mx, my, self.x, self.y, self.width, self.height)
+		and not love.mouse.isDown(1)
+	then
+		love.graphics.setColor(1, 1, 1, 0.2)
+		love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
+	end
+	
 	love.graphics.setColor(self.outlineColor)
 	love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
 	
@@ -630,6 +662,39 @@ function m.Dropdown:draw()
 end
 
 function m.Dropdown:mousepressed()
+	self.isOpen = not self.isOpen
+	
+	if self.isOpen then
+		self.gui.dropdownPopup = DropdownPopup{
+			dropdown = self,
+		}
+	else
+		self.gui.dropdownPopup = nil
+	end
+end
+
+-- DropdownPopup
+DropdownPopup = Object:extend()
+
+function DropdownPopup:new(t)
+	self.dropdown = t.dropdown
+	self.x = self.dropdown.x
+	self.y = self.dropdown.y
+	self.itemWidth = self.dropdown.width
+	self.itemHeight = 30
+end
+
+function DropdownPopup:draw()
+	for i, option in ipairs(self.dropdown.options) do
+		local y = self.y + self.dropdown.height + (i-1)*self.itemHeight
+		love.graphics.setColor(self.dropdown.menuColor)
+		love.graphics.rectangle('fill', self.x, y, self.itemWidth, self.itemHeight)
+		love.graphics.setColor(self.dropdown.outlineColor)
+		love.graphics.rectangle('line', self.x, y, self.itemWidth, self.itemHeight)
+		
+		love.graphics.setColor(self.dropdown.textColor)
+		love.graphics.print(option, self.x + 5, y + 5)
+	end
 end
 
 return m
