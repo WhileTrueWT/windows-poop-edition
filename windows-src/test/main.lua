@@ -28,7 +28,8 @@ function window.load()
 	local textBox = gui.TextBox{label = "test!", onEnterPressed = function(self)
 		messageBox("Text has been entered", self.value)
 	end}
-	frame:put({textBox}, {align = "left"})
+	local dropdown = gui.Dropdown{options = {"Hello", "World", "Third Thing"}}
+	frame:put({textBox, dropdown}, {align = "left"})
 	
 	local checkBox = gui.CheckBox{value = doThing, onToggle = function(value)
 		doThing = value

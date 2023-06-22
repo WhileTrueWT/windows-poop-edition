@@ -9,6 +9,14 @@ local function checkType(obj, class)
 	return (obj.is) and (obj:is(class))
 end
 
+local function isPointInRect(x, y, rx, ry, rw, rh)
+	return
+		x >= rx
+		and x <= rx+rw
+		and y >= ry
+		and y <= ry+rh
+end
+
 
 -- Gui
 
@@ -184,9 +192,7 @@ function m.Frame:mousepressed(x, y, button)
 	local mx, my = x - windowX, y - windowY
 	for _, group in ipairs(self.content) do
 		for _, element in ipairs(group.elements) do
-			if	element.x <= mx and mx <= element.x + element.width
-			and element.y <= my and my <= element.y + element.height
-			then
+			if isPointInRect(mx, my, element.x, element.y, element.width, element.height) then
 				element:mousepressed(x, y, button)
 			end
 		end
@@ -287,10 +293,8 @@ function m.Button:draw()
 	end
 	
 	local mx, my = love.graphics.inverseTransformPoint(love.mouse.getX(), love.mouse.getY())
-	if	self.x <= mx
-		and mx <= self.x + self.width
-		and self.y <= my
-		and my <= self.y + self.height
+	if
+		isPointInRect(mx, my. self.x, self.y, self.width, self.height)
 		and not love.mouse.isDown(1)
 	then
 		love.graphics.setColor(1, 1, 1, 0.2)
@@ -575,10 +579,8 @@ function m.CheckBox:draw()
 	image(self.value and "images/check.png" or "images/uncheck.png", self.x, self.y, self.width, self.height)
 	
 	local mx, my = love.graphics.inverseTransformPoint(love.mouse.getX(), love.mouse.getY())
-	if	self.x <= mx
-		and mx <= self.x + self.width
-		and self.y <= my
-		and my <= self.y + self.height
+	if
+		isPointInRect(mx, my, self.x, self.y, self.width, self.height)
 		and not love.mouse.isDown(1)
 	then
 		rect(self.x, self.y, self.width, self.height, {1, 1, 1, 0.2})
@@ -588,6 +590,46 @@ end
 function m.CheckBox:mousepressed()
 	self.value = not self.value
 	self.onToggle(self.value)
+end
+
+-- Dropdown
+
+m.Dropdown = Element:extend()
+
+function m.Dropdown:new(t)
+	self.super.new(self, t)
+	
+	self.options = t.options or {}
+	self.selection = t.selection or 1
+	self.value = self.options[self.selection]
+	self.isOpen = false
+	
+	self.width = t.width or 160
+	self.height = t.height or 30
+	self.color = t.color or {1, 1, 1, 1}
+	self.outlineColor = t.outlineColor or {0, 0, 0, 1}
+	self.textColor = t.textColor or style.text.color
+end
+
+function m.Dropdown:draw()
+	love.graphics.setColor(self.color)
+	love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
+	love.graphics.setColor(self.outlineColor)
+	love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
+	
+	love.graphics.setColor(self.textColor)
+	love.graphics.print(self.value, self.x + 5, self.y + 5)
+	
+	love.graphics.setColor(self.outlineColor)
+	love.graphics.polygon(
+		'fill',
+		self.x + self.width - 20, self.y + self.height/2 - 5,
+		self.x + self.width - 10, self.y + self.height/2 - 5,
+		self.x + self.width - 15, self.y + self.height/2 + 5
+	)
+end
+
+function m.Dropdown:mousepressed()
 end
 
 return m
