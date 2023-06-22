@@ -281,8 +281,6 @@ function m.Button:new(t)
 end
 
 function m.Button:draw()
-	local brightnessOffset = 0
-	
 	if type(self.color) == "table" then
 		love.graphics.setColor(self.color)
 		love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
