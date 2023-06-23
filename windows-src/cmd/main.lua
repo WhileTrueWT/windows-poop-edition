@@ -10,12 +10,18 @@ local scroll
 local function command(text)
 	local terms = {}
 	for term in string.gmatch(text, "%S+") do
-		term = string.gsub(term, "[^\\]_", " ")
-		term = string.gsub(term, "\\_", "_")
 		table.insert(terms, term)
 	end
 	
 	local cmd = terms[1]
+	
+	if cmd ~= "lua" then
+		for i, term in ipairs(terms) do
+			terms[i] = string.gsub(terms[i], "([^\\]?)_", "%1 ")
+			terms[i] = string.gsub(terms[i], "\\_", "_")
+		end
+	end
+	
 	local args = {}
 	for i=2,#terms do
 		args[i-1] = terms[i]
