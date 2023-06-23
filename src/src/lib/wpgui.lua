@@ -707,6 +707,7 @@ end
 
 function DropdownPopup:mousepressed(x, y, button)
 	local my = y - windowY
+	if my == self.y then return end		-- prevent strangeness if the very bottom of the dropdown button is clicked
 	
 	if button == 1 then
 		local selection = math.floor((my - self.y) / self.itemHeight) + 1
