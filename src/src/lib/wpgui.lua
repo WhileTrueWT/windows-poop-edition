@@ -334,14 +334,19 @@ m.Image = Element:extend()
 function m.Image:new(t)
 	self.file = t.file or ""
 	
-	t.width = t.width or self.loveImage:getWidth()
-	t.height = t.height or self.loveImage:getHeight()
+	local filedata = getResource(self.file)
+	assert(filedata, string.format("resource '%s' not found", self.file))
+	self.image = love.graphics.newImage(filedata)
+	
+	t.width = t.width or self.image:getWidth()
+	t.height = t.height or self.image:getHeight()
 	
 	self.super.new(self, t)
 end
 
 function m.Image:draw()
-	image(self.file, self.x, self.y, self.width, self.height)
+	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.draw(self.image, self.x, self.y, nil, self.width/self.image:getWidth(), self.height/self.image:getHeight())
 end
 
 -- Canvas

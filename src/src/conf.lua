@@ -11,5 +11,4 @@ function love.conf(t)
 	t.window.height = 720
 	t.window.resizable = true
 	t.window.depth = 16
-	t.console = true
 end
