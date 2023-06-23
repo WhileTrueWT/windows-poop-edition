@@ -849,13 +849,13 @@ local function drawMessageBox()
 		outline(messageX, messageY - 30, messageWidth, height + 30)
 		
 		-- title
-		text(currentMessageBox.title, messageX + 5, messageY - 15 - f:getHeight()/2, {1, 1, 1})
+		text(currentMessageBox.title, math.floor(messageX + 5), math.floor(messageY - 15 - f:getHeight()/2), {1, 1, 1})
 		
 		-- icon
 		image(messageBoxIcons[currentMessageBox.icon], messageX + 10, messageY + 10, 50, 50)
 		
 		-- text
-		text(currentMessageBox.text, messageX + 70 , messageY + 20, nil, messageWidth - 80)
+		text(currentMessageBox.text, math.floor(messageX + 70), math.floor(messageY + 20), nil, messageWidth - 80)
 		
 		-- buttons
 		local bx = messageX + 10
