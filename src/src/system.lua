@@ -13,7 +13,8 @@ local crashScreen = "screens/crash.lua"
 
 local screens = {}
 windows = {}
-local currentScreen, currentWindow, currentMessageBox, currentTextInputBox
+currentScreen = nil
+local currentWindow, currentMessageBox, currentTextInputBox
 local t
 
 local canClick
