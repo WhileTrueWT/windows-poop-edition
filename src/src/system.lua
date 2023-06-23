@@ -950,15 +950,20 @@ end
 
 local cursor = style.cursor.image and love.mouse.newCursor(style.cursor.image)
 
+local function updateDimensions(width, height)
+	width = width or love.graphics.getWidth()
+	height = height or love.graphics.getHeight()
+	displayWidth, displayHeight = width, height
+	messageX, messageY, messageWidth, messageHeight = displayWidth / 2 - 200, displayHeight / 2 - 60, 400, 120
+end
+
 -- love callbacks
 
 local callbacks = {}
 
 function callbacks.load()
 	
-	displayWidth, displayHeight = love.graphics.getWidth(), love.graphics.getHeight()
-	
-	messageX, messageY, messageWidth, messageHeight = displayWidth / 2 - 200, displayHeight / 2 - 60, 400, 120
+	updateDimensions()
 	
 	inputtingText = false
 	
@@ -1075,8 +1080,7 @@ end
 function callbacks.keypressed(key)
 	if key == "f4" then
 		love.window.setFullscreen(not love.window.getFullscreen())
-		displayWidth = love.graphics.getWidth()
-		displayHeight = love.graphics.getHeight()
+		updateDimensions()
 	end
 
 	if currentTextInputBox then
@@ -1126,8 +1130,7 @@ function callbacks.filedropped(file)
 end
 
 function callbacks.resize(width, height)
-	displayWidth = width
-	displayHeight = height
+	updateDimensions(width, height)
 end
 
 function callbacks.update(dt)
