@@ -598,7 +598,8 @@ function m.CheckBox:draw()
 		isPointInRect(mx, my, self.x, self.y, self.width, self.height)
 		and not love.mouse.isDown(1)
 	then
-		rect(self.x, self.y, self.width, self.height, {1, 1, 1, 0.2})
+		love.graphics.setColor(1, 1, 1, 0.2)
+		love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
 	end
 end
 

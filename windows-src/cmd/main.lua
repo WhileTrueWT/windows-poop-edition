@@ -209,6 +209,7 @@ function window.load()
 	stdout = "CrapOS Windows Poop Edition 5 - " .. systemVersion .."\n\"\"©\"\"2017-2023\n"
 	scroll = 0
 	t = 0
+	love.keyboard.setKeyRepeat(true)
 end
 
 function window.keypressed(key)
@@ -260,6 +261,10 @@ function window.draw()
 	text(s .. textCursor, 0, pos, {1, 1, 1}, windowWidth)
 	
 	love.graphics.pop()
+end
+
+function window.close()
+	love.keyboard.setKeyRepeat(false)
 end
 
 return window
