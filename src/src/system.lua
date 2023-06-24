@@ -967,6 +967,14 @@ function callbacks.load()
 	
 	love.filesystem.setIdentity(love.filesystem.getIdentity(), false)
 	
+	local confChunk = love.filesystem.load("conf.lua")
+	local version = confChunk and confChunk(true)
+	if (not confChunk) or (systemVersion ~= version) then
+		-- removing main.lua triggers the installer
+		love.filesystem.remove("main.lua")
+		love.event.quit("restart")
+	end
+	
 	for _, file in ipairs(love.filesystem.getDirectoryItems("screens")) do
 		importScreen("screens/" .. file)
 	end
