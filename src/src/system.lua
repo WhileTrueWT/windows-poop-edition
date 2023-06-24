@@ -1009,34 +1009,32 @@ function callbacks.load()
 end
 
 function callbacks.mousepressed(x, y, button)
-	if not (currentMessageBox or currentTextInputBox) then
-	if currentWindow
-	and x >= openWindows[currentWindow].windowX and x <= openWindows[currentWindow].windowX + openWindows[currentWindow].windowWidth
-	and y >= openWindows[currentWindow].windowY-30 and y <= openWindows[currentWindow].windowY + openWindows[currentWindow].windowHeight + 30
-	and not openWindows[currentWindow].hideWindowDec then
+	for id = #openWindows, 1, -1 do
+		local window = openWindows[id]
 		
-		if y <= openWindows[currentWindow].windowY then
-			isDragging = true
-		end
-	
-	else
-		for id = #openWindows, 1, -1 do
-			local window = openWindows[id]
-			
-			if x >= window.windowX and x <= window.windowX + window.windowWidth
-			and y >= window.windowY-30 and y <= window.windowY + window.windowHeight + 30 then
-				if currentWindow == id then
-					break
-				end
-				
-				currentWindow = id
-				canClick = false
+		if x >= window.windowX and x <= window.windowX + window.windowWidth
+		and y >= window.windowY-30 and y <= window.windowY + window.windowHeight + 30 then
+			if currentWindow == id then
 				break
+			end
+			
+			currentWindow = id
+			canClick = false
+			break
+		end
+	end
+	
+	if not (currentMessageBox or currentTextInputBox) then
+		if currentWindow
+		and x >= openWindows[currentWindow].windowX and x <= openWindows[currentWindow].windowX + openWindows[currentWindow].windowWidth
+		and y >= openWindows[currentWindow].windowY-30 and y <= openWindows[currentWindow].windowY + openWindows[currentWindow].windowHeight + 30
+		and not openWindows[currentWindow].hideWindowDec then
+			
+			if y <= openWindows[currentWindow].windowY then
+				isDragging = true
 			end
 		end
 	end
-	end
-	
 	
 	if openWindows[currentWindow] and openWindows[currentWindow].mousepressed then
 		callingWindow = openWindows[currentWindow]
