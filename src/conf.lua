@@ -2,6 +2,8 @@
 -- ... well technically src/conf.lua does not absolutely need to exist i think
 -- but this feels more complete okay
 
+systemVersion = "b6.0"
+
 function love.conf(t)
 	t.identity = "winpe5"
 	t.window.title = "Windows Poop Edition 5"
