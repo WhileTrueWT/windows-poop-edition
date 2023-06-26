@@ -284,6 +284,14 @@ function openWindow(file, arg)
 	window.windowX = window.windowX or (displayWidth / 2 - window.windowWidth / 2) + (id-1) * 40
 	window.windowY = window.windowY or (displayHeight / 2 - window.windowHeight / 2) + (id-1) * 40
 	
+	if window.fullscreen then
+		window.hideWindowDec = true
+		window.windowWidth = displayWidth
+		window.windowHeight = displayHeight
+		window.windowX = 0
+		window.windowY = 0
+	end
+	
 	windowX, windowY, windowWidth, windowHeight = window.windowX, window.windowY, window.windowWidth, window.windowHeight
 	
 	if openWindows[id].load then

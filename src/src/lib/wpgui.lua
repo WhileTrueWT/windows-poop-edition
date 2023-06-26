@@ -340,8 +340,11 @@ function m.Image:new(t)
 	self.file = t.file or ""
 	
 	local filedata = getResource(self.file)
-	assert(filedata, string.format("resource '%s' not found", self.file))
-	self.image = love.graphics.newImage(filedata)
+	if filedata then
+		self.image = love.graphics.newImage(filedata)
+	else
+		self.image = love.graphics.newImage(self.file)
+	end
 	
 	t.width = t.width or self.image:getWidth()
 	t.height = t.height or self.image:getHeight()

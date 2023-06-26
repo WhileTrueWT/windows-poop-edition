@@ -1,8 +1,11 @@
 local window = {}
 window.title = "Minecraft"
+window.fullscreen = true
+--[[
 window.hideWindowDec = true
 window.windowWidth, window.windowHeight = displayWidth, displayHeight
 window.windowX, window.windowY = 0, 0
+]]
 
 local screen
 local screens = {}
