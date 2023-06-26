@@ -525,7 +525,8 @@ end
 
 function shutdown(restart)
 	local refusingWindows = {}
-	for id, window in ipairs(openWindows) do
+	for id = #openWindows, 1, -1 do
+		local window = openWindows[id]
 		local status = closeWindow(id)
 		if status then
 			table.insert(refusingWindows, {id=id, window=window})
