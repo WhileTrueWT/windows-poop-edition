@@ -1,7 +1,6 @@
 local window = {}
 window.title = "Stick Collector"
-window.windowX, window.windowY = 0, 0
-window.windowWidth, window.windowHeight = displayWidth, displayHeight
+window.fullscreen = true
 
 local world
 local player
