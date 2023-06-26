@@ -109,7 +109,7 @@ function love.draw()
 		love.graphics.printf(
 			"Windows Poop Edition has installed successfully, I think. Now you can experience this OS's wonderful technologies!\n\nPress any key to reboot into Windows PE...",
 			10, 10,
-			love.graphics.getWidth()-20
+			bodyWidth-20
 		)
 	
 	else
