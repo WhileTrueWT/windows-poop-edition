@@ -281,7 +281,12 @@ function m.Button:new(t)
 	t.height = t.height or 30
 	
 	if type(self.color) == "string" then
-		self.color = love.graphics.newImage(self.color)
+		local filedata = getResource(self.color)
+		if filedata then
+			self.color = love.graphics.newImage(filedata)
+		else
+			self.color = love.graphics.newImage(self.color)
+		end
 	end
 	
 	self.super.new(self, t)
