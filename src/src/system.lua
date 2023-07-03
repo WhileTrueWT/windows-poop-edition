@@ -297,7 +297,7 @@ function openWindow(file, arg)
 	if openWindows[id].load then
 		local ok, msg = pcall(openWindows[id].load, arg)
 		if not ok then
-			closeWindow(nil, true)
+			closeWindow(callingWindow.id, true)
 			messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
 		end
 	end
@@ -320,6 +320,8 @@ function legacyOpenWindow(file, arg)
 	
 	table.insert(openWindows, window)
 	
+	callingWindow = window
+	
 	local id = #openWindows
 	window.id = id
 	
@@ -333,7 +335,7 @@ function legacyOpenWindow(file, arg)
 	if openWindows[id].load then
 		local ok, msg = pcall(openWindows[id].load, arg)
 		if not ok then
-			closeWindow(nil, true)
+			closeWindow(callingWindow.id, true)
 			messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
 		end
 	end
@@ -597,7 +599,7 @@ end
 local function call(func, ...)
 	local ok, msg = pcall(func, ...)
 	if not ok then
-		closeWindow(nil, true)
+		closeWindow(callingWindow.id, true)
 		messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}}, "critical")
 	end
 end
@@ -799,11 +801,11 @@ function importWindow(file)
 		ok, chunk = pcall(loadstring, file:getString(), file:getFilename())
 	end
 	if not ok then
-		window = {load = function() messageBox("Program Error", chunk, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
+		window = {load = function() messageBox("Program Error", chunk, {{"OK", function() closeMessageBox() closeWindow(currentWindow, true) end}}, "critical") end}
 	else
 		ok, result = pcall(chunk)
 		if not ok then
-			window = {load = function() messageBox("Program Error", result, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
+			window = {load = function() messageBox("Program Error", result, {{"OK", function() closeMessageBox() closeWindow(currentWindow, true) end}}, "critical") end}
 		elseif type(result) == "table" then
 			window = result
 		else
@@ -1109,7 +1111,7 @@ function callbacks.keypressed(key)
 				callingWindow = currentTextInputBox.window
 				local ok, msg = pcall(currentTextInputBox.onfinish, currentTextInputBox.input)
 				if not ok then
-					closeWindow()
+					closeWindow(callingWindow.id)
 					messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}}, "critical")
 					return
 				end
