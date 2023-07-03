@@ -200,31 +200,33 @@ function m.Frame:computePositions()
 	end
 end
 
-function m.Frame:mousepressed(x, y, button)
-	local mx, my = x - windowX, y - windowY
+function m.Frame:iterateElements(func)
 	for _, group in ipairs(self.content) do
 		for _, element in ipairs(group.elements) do
-			if isPointInRect(mx, my, element.x, element.y, element.width, element.height) then
-				element:mousepressed(x, y, button)
-			end
+			func(element)
 		end
 	end
+end
+
+function m.Frame:mousepressed(x, y, button)
+	local mx, my = x - windowX, y - windowY
+	self:iterateElements(function(element)
+		if isPointInRect(mx, my, element.x, element.y, element.width, element.height) then
+			element:mousepressed(x, y, button)
+		end
+	end)
 end
 
 function m.Frame:keypressed(key, scancode)
-	for _, group in ipairs(self.content) do
-		for _, element in ipairs(group.elements) do
-			element:keypressed(key, scancode)
-		end
-	end
+	self:iterateElements(function(element)
+		element:keypressed(key, scancode)
+	end)
 end
 
 function m.Frame:textinput(text)
-	for _, group in ipairs(self.content) do
-		for _, element in ipairs(group.elements) do
-			element:textinput(text)
-		end
-	end
+	self:iterateElements(function(element)
+		element:textinput(text)
+	end)
 end
 
 function m.Frame:draw()
@@ -234,13 +236,11 @@ function m.Frame:draw()
 	love.graphics.setColor(self.outlineColor)
 	love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
 	
-	for _, group in ipairs(self.content) do
-		for _, element in ipairs(group.elements) do
-			if checkType(element, Element) then
-				element:draw()
-			end
+	self:iterateElements(function(element)
+		if checkType(element, Element) then
+			element:draw()
 		end
-	end
+	end)
 end
 
 -- Text
