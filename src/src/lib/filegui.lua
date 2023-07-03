@@ -132,11 +132,11 @@ local tooltipOptions = {
 	end, global=true},
 	{"Delete", function(file)
 		messageBox("Explorer", "You are about to delete '" .. file .. "'. Are you sure?", {{"Yes", function()
+			closeMessageBox()
 			local success = love.filesystem.remove(cdir .. file)
 			if not success then
 				operationError()
 			end
-			closeMessageBox()
 			refresh()
 		end}, {"No", function() closeMessageBox() end}})
 	end}
