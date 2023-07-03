@@ -363,7 +363,7 @@ end
 --]]
 
 function closeWindow(id, force)
-	id = id or currentWindow
+	id = id or callingWindow.id
 	
 	if not force and openWindows[id] and openWindows[id].close then
 		local status = openWindows[id].close()
@@ -828,10 +828,10 @@ function windowDec(window, id)
 	text(title, 5, -15 - f:getHeight()/2, {1, 1, 1})
 	
 	-- minimize button
-	button("", function() hideWindow() end, window.windowWidth - 60, -30, 30, 30, style.windowBar.minimizeButtonColor, nil, false)
+	button("", function() hideWindow(id) end, window.windowWidth - 60, -30, 30, 30, style.windowBar.minimizeButtonColor, nil, false)
 	
 	-- close button
-	button("", function() closeWindow() end, window.windowWidth - 30, -30, 30, 30, style.windowBar.closeButtonColor, nil, false)
+	button("", function() closeWindow(id) end, window.windowWidth - 30, -30, 30, 30, style.windowBar.closeButtonColor, nil, false)
 end
 
 -- MESSAGE BOX
