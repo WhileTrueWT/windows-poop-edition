@@ -1,5 +1,6 @@
 local callbacks = {}
 local err
+local biggerFont = love.graphics.newFont(24)
 
 local function drawErr(msg)
 	if err then return else err = true end
@@ -13,7 +14,7 @@ local function drawErr(msg)
 		love.draw = nil
 		love.draw = function()
 			love.graphics.reset()
-			love.graphics.scale(2)
+			love.graphics.setFont(biggerFont)
 			love.graphics.printf("CrapOS has failed.\n" .. tostring(msg), 0, 0, love.graphics.getWidth()/2)
 		end
 	end
@@ -108,7 +109,7 @@ function love.errorhandler(msg)
 	showmsg()
 end
 
-love.graphics.setNewFont(18)
+love.graphics.setFont(biggerFont)
 love.graphics.setColor(1, 1, 1, 1)
 love.graphics.print("Loading CrapOS...", 10, 10)
 love.graphics.present()
