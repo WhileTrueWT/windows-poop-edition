@@ -108,6 +108,11 @@ function love.errorhandler(msg)
 	showmsg()
 end
 
+love.graphics.setNewFont(18)
+love.graphics.setColor(1, 1, 1, 1)
+love.graphics.print("Loading CrapOS...", 10, 10)
+love.graphics.present()
+
 local ok, chunk = pcall(love.filesystem.load, "system.lua")
 if ok then
 	local ok, msg = pcall(chunk)
