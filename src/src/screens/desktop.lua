@@ -49,14 +49,22 @@ function screen.draw()
 	filegui.drawFileList(10, 10, displayWidth, displayHeight-50, not (isWindowOpen() or isMessageBoxShowing() or isTextInputShowing()))
 	image("images/gradient.png", 0, displayHeight-taskbarHeight, displayWidth, taskbarHeight, settings.themeColor)
 	
-	button("", function() openWindow("windows/startmenu.exe") end, 0, displayHeight-taskbarHeight, 40, taskbarHeight, "images/logo.png", nil, false)
+	button("", function()
+		if not (isMessageBoxShowing() or isTextInputShowing()) then
+			openWindow("windows/startmenu.exe")
+		end
+	end, 0, displayHeight-taskbarHeight, 40, taskbarHeight, "images/logo.png", nil, false)
 	
 	local ex = 50
 	for id, w in ipairs(openWindows) do
 		if w.file ~= "windows/startmenu.exe" then
 			local title = w.title or ""
 			local width = math.max(f:getWidth(title) + 50, 180)
-			button(title, function() showWindow(id) end, ex, displayHeight-40, width, 40, nil, {1, 1, 1, 1}, nil, darkerColor)
+			button(title, function()
+				if not (isMessageBoxShowing() or isTextInputShowing()) then
+					showWindow(id)
+				end
+			end, ex, displayHeight-40, width, 40, nil, {1, 1, 1, 1}, nil, darkerColor)
 			callingWindow = w
 			image(w.icon or "images/icons/app.png", ex+5, displayHeight-30, 20, 20)
 			callingWindow = nil
@@ -69,12 +77,14 @@ function screen.draw()
 	text(cd, displayWidth - f:getWidth(cd) - 20, displayHeight - 20 - f:getHeight() / 2 + 8, {1, 1, 1})
 	
 	button("", function()
-		if #openWindows > 0 then
-			showWindow(#openWindows)
-		end
-		
-		while isWindowOpen() do
-			hideWindow()
+		if not (isMessageBoxShowing() or isTextInputShowing()) then
+			if #openWindows > 0 then
+				showWindow(#openWindows)
+			end
+			
+			while isWindowOpen() do
+				hideWindow()
+			end
 		end
 	end, displayWidth - 10, displayHeight-taskbarHeight, 10, taskbarHeight, nil, nil, false, darkerColor)
 	if notif then
