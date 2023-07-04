@@ -123,7 +123,7 @@ local sections = {
 			text("Resets all settings and restarts your computer", 160, 80, nil, windowWidth-290)
 			
 			button("Reinstall", function() 
-				messageBox("Confirmation", "Are you sure you want to reinstall? Your files will be preserved, but your computer will restart and the installer will be run again.", {{"Yes", function()
+				messageBox("Confirmation", "Are you sure you want to reinstall? Your files and settings will be preserved, but your computer will restart and the installer will be run again.", {{"Yes", function()
 					love.filesystem.remove("main.lua")
 					love.event.quit("restart")
 				end}, {"No", function() closeMessageBox() end}})
