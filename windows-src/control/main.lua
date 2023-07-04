@@ -122,15 +122,23 @@ local sections = {
 			end, 10, 80, 140, 30)
 			text("Resets all settings and restarts your computer", 160, 80, nil, windowWidth-290)
 			
-			text("WARNING: Everything below this point is stuff that you probably shouldn't touch unless you know what you're doing (at least somewhat)!", 10, 120, nil, windowWidth-290)
+			button("Reinstall", function() 
+				messageBox("Confirmation", "Are you sure you want to reinstall? Your files will be preserved, but your computer will restart and the installer will be run again.", {{"Yes", function()
+					love.filesystem.remove("main.lua")
+					love.event.quit("restart")
+				end}, {"No", function() closeMessageBox() end}})
+			end, 10, 120, 140, 30)
+			text("Run the installer and reinstall the OS", 160, 120, nil, windowWidth-290)
 			
-			text("appendToPath:", 10, 200)
+			text("WARNING: Everything below this point is stuff that you probably shouldn't touch unless you know what you're doing (at least somewhat)!", 10, 160, nil, windowWidth-290)
+			
+			text("appendToPath:", 10, 240)
 			button("Save Directory First", function()
 				settings.appendToPath = "false"
-			end, 160, 200, 240, 40)
+			end, 160, 240, 240, 40)
 			button("Source Directory First", function()
 				settings.appendToPath = "true"
-			end, 160, 250, 240, 40)
+			end, 160, 290, 240, 40)
 		end
 	},
 }
