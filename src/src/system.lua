@@ -365,7 +365,7 @@ end
 --]]
 
 function closeWindow(id, force)
-	id = id or callingWindow.id
+	id = id or (callingWindow and callingWindow.id) or currentWindow
 	
 	if not force and openWindows[id] and openWindows[id].close then
 		local status = openWindows[id].close()
@@ -801,11 +801,11 @@ function importWindow(file)
 		ok, chunk = pcall(loadstring, file:getString(), file:getFilename())
 	end
 	if not ok then
-		window = {load = function() messageBox("Program Error", chunk, {{"OK", function() closeMessageBox() closeWindow(currentWindow, true) end}}, "critical") end}
+		window = {load = function() messageBox("Program Error", chunk, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
 	else
 		ok, result = pcall(chunk)
 		if not ok then
-			window = {load = function() messageBox("Program Error", result, {{"OK", function() closeMessageBox() closeWindow(currentWindow, true) end}}, "critical") end}
+			window = {load = function() messageBox("Program Error", result, {{"OK", function() closeMessageBox() closeWindow(nil, true) end}}, "critical") end}
 		elseif type(result) == "table" then
 			window = result
 		else
