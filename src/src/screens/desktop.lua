@@ -51,7 +51,17 @@ function screen.draw()
 	
 	button("", function()
 		if not (isMessageBoxShowing() or isTextInputShowing()) then
-			openWindow("windows/startmenu.exe")
+			local isStartMenuOpen = false
+			for id, w in ipairs(openWindows) do
+				if w.file == "windows/startmenu.exe" then
+					isStartMenuOpen = true
+					break
+				end
+			end
+			
+			if not isStartMenuOpen then
+				openWindow("windows/startmenu.exe")
+			end
 		end
 	end, 0, displayHeight-taskbarHeight, 40, taskbarHeight, "images/logo.png", nil, false)
 	
