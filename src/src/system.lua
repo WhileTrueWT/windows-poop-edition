@@ -599,7 +599,7 @@ end
 local function call(func, ...)
 	local ok, msg = pcall(func, ...)
 	if not ok then
-		closeWindow(callingWindow.id, true)
+		closeWindow(nil, true)
 		messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}}, "critical")
 	end
 end
