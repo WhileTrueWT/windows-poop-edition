@@ -57,6 +57,8 @@ function m.Gui:draw()
 end
 
 function m.Gui:mousepressed(x, y, button)
+	if isMessageBoxShowing() or isTextInputShowing() then return end
+	
 	self.frame:mousepressed(x, y, button)
 	
 	if self.dropdownPopup then
@@ -68,10 +70,14 @@ function m.Gui:mousepressed(x, y, button)
 end
 
 function m.Gui:keypressed(...)
+	if isMessageBoxShowing() or isTextInputShowing() then return end
+	
 	self.frame:keypressed(...)
 end
 
 function m.Gui:textinput(...)
+	if isMessageBoxShowing() or isTextInputShowing() then return end
+	
 	self.frame:textinput(...)
 end
 
