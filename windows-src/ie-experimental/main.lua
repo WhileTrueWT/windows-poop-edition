@@ -19,6 +19,8 @@ local scrollY
 local requestThread
 local isRequesting = false
 
+local programCantStart = false
+
 function goToPage(id, arg)
 	page = id
 	scrollY = 0
@@ -122,8 +124,11 @@ end
 
 function window.load()
 	if love.system.getOS() ~= "Linux" then
-		closeWindow(window.id, true)
-		messageBox("Error", "This program currently only works on a Linux host.")
+		programCantStart = true
+		messageBox("Error", "This program currently only works on a Linux host.", {{"OK", function()
+			closeMessageBox()
+			closeWindow()
+		end}})
 		return
 	end
 	
@@ -186,6 +191,8 @@ function window.load()
 end
 
 function window.update(dt)
+	if programCantStart then return end
+	
 	if legacyCurrentPage and legacyCurrentPage.update then
 		legacyCurrentPage.update(dt)
 	
@@ -201,6 +208,8 @@ function window.update(dt)
 end
 
 function window.draw()
+	if programCantStart then return end
+	
 	mainGui:draw()
 	
 	--[[
@@ -220,18 +229,22 @@ function window.draw()
 end
 
 function window.mousepressed(...)
+	if programCantStart then return end
 	mainGui:mousepressed(...)
 end
 
 function window.keypressed(...)
+	if programCantStart then return end
 	mainGui:keypressed(...)
 end
 
 function window.textinput(...)
+	if programCantStart then return end
 	mainGui:textinput(...)
 end
 
 function window.wheelmoved(dx, dy)
+	if programCantStart then return end
 	scrollY = scrollY + dy*10
 end
 
