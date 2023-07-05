@@ -1,7 +1,5 @@
 local addr = "*:8798"
 
-if love then love.window.close() end
-
 local enet = require "enet"
 local json = require "json"
 
