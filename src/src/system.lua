@@ -297,7 +297,7 @@ function openWindow(file, arg)
 	if openWindows[id].load then
 		local ok, msg = pcall(openWindows[id].load, arg)
 		if not ok then
-			closeWindow(callingWindow.id, true)
+			closeWindow(callingWindow, true)
 			messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
 		end
 	end
@@ -335,7 +335,7 @@ function legacyOpenWindow(file, arg)
 	if openWindows[id].load then
 		local ok, msg = pcall(openWindows[id].load, arg)
 		if not ok then
-			closeWindow(callingWindow.id, true)
+			closeWindow(callingWindow, true)
 			messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
 		end
 	end
@@ -364,17 +364,22 @@ function openSubwindow(window)
 end
 --]]
 
-function closeWindow(id, force)
-	id = id or (callingWindow and callingWindow.id) or currentWindow
+function closeWindow(window, force)
+	window = window or callingWindow or openWindows[currentWindow]
 	
-	if not force and openWindows[id] and openWindows[id].close then
-		local status = openWindows[id].close()
+	if not force and window and window.close then
+		local status = window.close()
 		if status then
 			return status
 		end
 	end
 	
-	table.remove(openWindows, id)
+	for i, w in ipairs(openWindows) do
+		if w == window then
+			table.remove(openWindows, i)
+			break
+		end
+	end
 	
 	if #openWindows > 0 then
 		local i = #openWindows
@@ -529,7 +534,7 @@ function shutdown(restart)
 	local refusingWindows = {}
 	for id = #openWindows, 1, -1 do
 		local window = openWindows[id]
-		local status = closeWindow(id)
+		local status = closeWindow(window)
 		if status then
 			table.insert(refusingWindows, {id=id, window=window})
 		end
@@ -544,7 +549,7 @@ function shutdown(restart)
 			{"OK", function() closeMessageBox() end},
 			{"Force Quit", function()
 				for _, w in ipairs(refusingWindows) do
-					closeWindow(w.id, true)
+					closeWindow(w, true)
 				end
 				switchScreen("screens/shutdown.lua", restart and "restart")
 			end}
@@ -833,7 +838,7 @@ function windowDec(window, id)
 	button("", function() hideWindow(id) end, window.windowWidth - 60, -30, 30, 30, style.windowBar.minimizeButtonColor, nil, false)
 	
 	-- close button
-	button("", function() closeWindow(id) end, window.windowWidth - 30, -30, 30, 30, style.windowBar.closeButtonColor, nil, false)
+	button("", function() closeWindow(window) end, window.windowWidth - 30, -30, 30, 30, style.windowBar.closeButtonColor, nil, false)
 end
 
 -- MESSAGE BOX
@@ -1111,7 +1116,7 @@ function callbacks.keypressed(key)
 				callingWindow = currentTextInputBox.window
 				local ok, msg = pcall(currentTextInputBox.onfinish, currentTextInputBox.input)
 				if not ok then
-					closeWindow(callingWindow.id)
+					closeWindow(callingWindow)
 					messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}}, "critical")
 					return
 				end
