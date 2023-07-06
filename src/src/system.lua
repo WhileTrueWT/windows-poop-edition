@@ -1034,10 +1034,15 @@ end
 
 function callbacks.mousepressed(x, y, button)
 	local curwin = currentWindow and openWindows[currentWindow]
+	local rx = curwin and x >= curwin.windowX + curwin.windowWidth and x <= curwin.windowX + curwin.windowWidth + 5
+	local ry = curwin and y >= curwin.windowY + curwin.windowHeight and y <= curwin.windowY + curwin.windowHeight + 5
+			
 	hasClickedCurrentWindow = curwin and (
-		x >= curwin.windowX and x <= curwin.windowX + curwin.windowWidth
-		and y >= curwin.windowY-30 and y <= curwin.windowY + curwin.windowHeight + 30
-	)
+		(x >= curwin.windowX and x <= curwin.windowX + curwin.windowWidth
+		and y >= curwin.windowY-30 and y <= curwin.windowY + curwin.windowHeight + 30)
+	or (
+		curwin.resizable and (rx or ry)
+	))
 	
 	if not (currentMessageBox or currentTextInputBox) then
 		if not hasClickedCurrentWindow then
@@ -1068,9 +1073,6 @@ function callbacks.mousepressed(x, y, button)
 		end
 		
 		if curwin and curwin.resizable then
-			local rx = x >= curwin.windowX + curwin.windowWidth and x <= curwin.windowX + curwin.windowWidth + 5
-			local ry = y >= curwin.windowY + curwin.windowHeight and y <= curwin.windowY + curwin.windowHeight + 5
-			
 			isResizingX = rx
 			isResizingY = ry
 			if rx or ry then
