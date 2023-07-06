@@ -1025,19 +1025,27 @@ function callbacks.load()
 end
 
 function callbacks.mousepressed(x, y, button)
+	local curwin = currentWindow and openWindows[currentWindow]
+	hasClickedCurrentWindow = curwin and (
+		x >= curwin.windowX and x <= curwin.windowX + curwin.windowWidth
+		and y >= curwin.windowY-30 and y <= curwin.windowY + curwin.windowHeight + 30
+	)
+	
 	if not (currentMessageBox or currentTextInputBox) then
-		for id = #openWindows, 1, -1 do
-			local window = openWindows[id]
-			
-			if x >= window.windowX and x <= window.windowX + window.windowWidth
-			and y >= window.windowY-30 and y <= window.windowY + window.windowHeight + 30 then
-				if currentWindow == id then
+		if not hasClickedCurrentWindow then
+			for id = #openWindows, 1, -1 do
+				local window = openWindows[id]
+				
+				if x >= window.windowX and x <= window.windowX + window.windowWidth
+				and y >= window.windowY-30 and y <= window.windowY + window.windowHeight + 30 then
+					if currentWindow == id then
+						break
+					end
+					
+					currentWindow = id
+					canClick = false
 					break
 				end
-				
-				currentWindow = id
-				canClick = false
-				break
 			end
 		end
 		
