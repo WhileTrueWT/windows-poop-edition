@@ -72,7 +72,7 @@ style.window = {}
 style.window.backgroundColor = {0.95, 0.95, 0.95}
 
 style.cursor = {}
-style.cursor.image = "images/cursor.png"
+--style.cursor.image = "images/cursor.png"
 
 style.font = "fonts/DejaVuSans.ttf"
 
