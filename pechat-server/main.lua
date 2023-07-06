@@ -8,6 +8,9 @@ local json = require "json"
 local host
 local commands = {}
 local names = {}
+local chatReplay = {}
+local chatReplaySize = 27		-- the number of messages that can fill the window
+								-- minus the two server messages that appear on join
 
 local function getName(peer)
 	local idx = peer:index()
@@ -23,6 +26,18 @@ local function checkNameDuplicate(s)
 	return false
 end
 
+local function addChatReplay(msgType, msg, name)
+	if #chatReplay == chatReplaySize then
+		table.remove(chatReplay, 1)
+	end
+	
+	table.insert(chatReplay, {
+		type = msgType,
+		msg = msg,
+		name = name,
+	})
+end
+
 commands.msg_send = function(a, peer)
 	local msg = a[1]
 	local name = getName(peer)
@@ -31,6 +46,8 @@ commands.msg_send = function(a, peer)
 	if #msg > 1000 then
 		msg = string.sub(msg, 1, 1000)
 	end
+	
+	addChatReplay("user", msg, name)
 	
 	host:broadcast(json.encode{
 		"msg_receive",
@@ -49,10 +66,12 @@ commands.set_name = function(a, peer)
 	
 	names[idx] = name
 	
+	addChatReplay("server", {"name_change", name, oldName})
+	
 	host:broadcast(json.encode{
 		"server_msg",
 		{"name_change", name, oldName}
-	}) 
+	})
 end
 
 commands.user_list = function(a, peer)
@@ -97,18 +116,40 @@ while true do
 			
 		elseif event.type == "connect" then
 			
+			for _, message in ipairs(chatReplay) do
+				if message.type == "user" then
+					event.peer:send(json.encode{
+						"msg_receive",
+						{message.msg, message.name}
+					})
+				elseif message.type == "server" then
+					event.peer:send(json.encode{
+						"server_msg",
+						message.msg
+					})
+				end
+			end
+			
+			local name = getName(event.peer)
+			
 			host:broadcast(json.encode{
 				"server_msg",
-				{"connect", getName(event.peer)}
+				{"connect", name}
 			})
+			
+			addChatReplay("server", {"connect", name})
 			
 		elseif event.type == "disconnect" then
 			
+			local name = getName(event.peer)
+			
 			host:broadcast(json.encode{
 				"server_msg",
-				{"disconnect", getName(event.peer)}
+				{"disconnect", name}
 			})
 			names[event.peer:index()] = 0
+			
+			addChatReplay("server", {"disconnect", name})
 			
 		end
 		
