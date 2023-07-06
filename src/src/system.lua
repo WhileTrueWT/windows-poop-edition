@@ -409,7 +409,7 @@ function showWindow(id)
 	window.isActive = true
 end
 
-function hideWindow(id)
+function hideWindow()
 	if currentWindow == nil then return end
 	
 	openWindows[currentWindow].isActive = false
@@ -835,7 +835,7 @@ function windowDec(window, id)
 	text(title, 5, -15 - f:getHeight()/2, {1, 1, 1})
 	
 	-- minimize button
-	button("", function() hideWindow(id) end, window.windowWidth - 60, -30, 30, 30, style.windowBar.minimizeButtonColor, nil, false)
+	button("", function() hideWindow() end, window.windowWidth - 60, -30, 30, 30, style.windowBar.minimizeButtonColor, nil, false)
 	
 	-- close button
 	button("", function() closeWindow(window) end, window.windowWidth - 30, -30, 30, 30, style.windowBar.closeButtonColor, nil, false)
