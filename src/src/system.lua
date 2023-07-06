@@ -24,6 +24,8 @@ openWindows = {}
 windowX, windowY, windowWidth, windowHeight = 0, 0, 0, 0
 
 local isDragging = false
+local isResizingX = false
+local isResizingY = false
 
 --local callingWindow
 
@@ -284,12 +286,15 @@ function openWindow(file, arg)
 	window.windowX = window.windowX or (displayWidth / 2 - window.windowWidth / 2) + (id-1) * 40
 	window.windowY = window.windowY or (displayHeight / 2 - window.windowHeight / 2) + (id-1) * 40
 	
+	if window.resizable == nil then window.resizable = true end
+	
 	if window.fullscreen then
 		window.hideWindowDec = true
 		window.windowWidth = displayWidth
 		window.windowHeight = displayHeight
 		window.windowX = 0
 		window.windowY = 0
+		window.resizable = false
 	end
 	
 	windowX, windowY, windowWidth, windowHeight = window.windowX, window.windowY, window.windowWidth, window.windowHeight
@@ -963,6 +968,9 @@ function drawTextInputBox()
 end
 
 local cursor = style.cursor.image and love.mouse.newCursor(style.cursor.image)
+local cursorSizewe = love.mouse.getSystemCursor("sizewe")
+local cursorSizens = love.mouse.getSystemCursor("sizens")
+local cursorSizenwse = love.mouse.getSystemCursor("sizenwse")
 
 local function updateDimensions(width, height)
 	width = width or love.graphics.getWidth()
@@ -1049,13 +1057,24 @@ function callbacks.mousepressed(x, y, button)
 			end
 		end
 		
-		if currentWindow
-		and x >= openWindows[currentWindow].windowX and x <= openWindows[currentWindow].windowX + openWindows[currentWindow].windowWidth
-		and y >= openWindows[currentWindow].windowY-30 and y <= openWindows[currentWindow].windowY + openWindows[currentWindow].windowHeight + 30
-		and not openWindows[currentWindow].hideWindowDec then
+		if curwin
+		and x >= curwin.windowX and x <= curwin.windowX + curwin.windowWidth
+		and y >= curwin.windowY-30 and y <= curwin.windowY + curwin.windowHeight + 30
+		and not curwin.hideWindowDec then
 			
-			if y <= openWindows[currentWindow].windowY then
+			if y <= curwin.windowY then
 				isDragging = true
+			end
+		end
+		
+		if curwin then
+			local rx = x >= curwin.windowX + curwin.windowWidth and x <= curwin.windowX + curwin.windowWidth + 5
+			local ry = y >= curwin.windowY + curwin.windowHeight and y <= curwin.windowY + curwin.windowHeight + 5
+			
+			isResizingX = rx
+			isResizingY = ry
+			if rx or ry then
+				canClick = false
 			end
 		end
 	end
@@ -1075,22 +1094,48 @@ function callbacks.mousereleased(x, y, button)
 	end
 	canClick = true
 	isDragging = false
+	isResizingX = false
+	isResizingY = false
 end
 
 function callbacks.mousemoved(x, y, dx, dy)
-	if openWindows[currentWindow] then
+	local window = openWindows[currentWindow]
+	if window then
 		if isDragging then
-			openWindows[currentWindow].windowX = openWindows[currentWindow].windowX + dx
-			openWindows[currentWindow].windowY = openWindows[currentWindow].windowY + dy
+			window.windowX = window.windowX + dx
+			window.windowY = window.windowY + dy
 			
-			if openWindows[currentWindow].windowY > displayHeight - 40 then
-				openWindows[currentWindow].windowY = openWindows[currentWindow].windowY - dy
+			if window.windowY > displayHeight - 40 then
+				window.windowY = window.windowY - dy
 			end
 		end
 		
-		if openWindows[currentWindow].mousemoved then
-			callingWindow = openWindows[currentWindow]
-			call(openWindows[currentWindow].mousemoved, x, y, dx, dy)
+		if window.resizable then
+			local rx = x >= window.windowX + window.windowWidth and x <= window.windowX + window.windowWidth + 5
+			local ry = y >= window.windowY + window.windowHeight and y <= window.windowY + window.windowHeight + 5
+			
+			if (isResizingX and isResizingY) or (rx and ry) then
+				love.mouse.setCursor(cursorSizenwse)
+			elseif isResizingX or rx then
+				love.mouse.setCursor(cursorSizewe)
+			elseif isResizingY or ry then
+				love.mouse.setCursor(cursorSizens)
+			else
+				love.mouse.setCursor(cursor)
+			end
+			
+			if isResizingX and (x - window.windowX) >= 100 then
+				window.windowWidth = x - window.windowX
+			end
+			
+			if isResizingY and (y - window.windowY) >= 100 then
+				window.windowHeight = y - window.windowY
+			end
+		end
+		
+		if window.mousemoved then
+			callingWindow = window
+			call(window.mousemoved, x, y, dx, dy)
 			callingWindow = nil
 		end
 	end
