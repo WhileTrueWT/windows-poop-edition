@@ -1067,7 +1067,7 @@ function callbacks.mousepressed(x, y, button)
 			end
 		end
 		
-		if curwin then
+		if curwin and curwin.resizable then
 			local rx = x >= curwin.windowX + curwin.windowWidth and x <= curwin.windowX + curwin.windowWidth + 5
 			local ry = y >= curwin.windowY + curwin.windowHeight and y <= curwin.windowY + curwin.windowHeight + 5
 			
