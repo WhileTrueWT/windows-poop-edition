@@ -24,6 +24,8 @@ openWindows = {}
 windowX, windowY, windowWidth, windowHeight = 0, 0, 0, 0
 
 local isDragging = false
+local isResizingX = false
+local isResizingY = false
 
 --local callingWindow
 
@@ -70,7 +72,7 @@ style.window = {}
 style.window.backgroundColor = {0.95, 0.95, 0.95}
 
 style.cursor = {}
-style.cursor.image = "images/cursor.png"
+--style.cursor.image = "images/cursor.png"
 
 style.font = "fonts/DejaVuSans.ttf"
 
@@ -284,12 +286,15 @@ function openWindow(file, arg)
 	window.windowX = window.windowX or (displayWidth / 2 - window.windowWidth / 2) + (id-1) * 40
 	window.windowY = window.windowY or (displayHeight / 2 - window.windowHeight / 2) + (id-1) * 40
 	
+	if window.resizable == nil then window.resizable = true end
+	
 	if window.fullscreen then
 		window.hideWindowDec = true
 		window.windowWidth = displayWidth
 		window.windowHeight = displayHeight
 		window.windowX = 0
 		window.windowY = 0
+		window.resizable = false
 	end
 	
 	windowX, windowY, windowWidth, windowHeight = window.windowX, window.windowY, window.windowWidth, window.windowHeight
@@ -297,7 +302,7 @@ function openWindow(file, arg)
 	if openWindows[id].load then
 		local ok, msg = pcall(openWindows[id].load, arg)
 		if not ok then
-			closeWindow(callingWindow.id, true)
+			closeWindow(callingWindow, true)
 			messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
 		end
 	end
@@ -335,7 +340,7 @@ function legacyOpenWindow(file, arg)
 	if openWindows[id].load then
 		local ok, msg = pcall(openWindows[id].load, arg)
 		if not ok then
-			closeWindow(callingWindow.id, true)
+			closeWindow(callingWindow, true)
 			messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}})
 		end
 	end
@@ -364,17 +369,22 @@ function openSubwindow(window)
 end
 --]]
 
-function closeWindow(id, force)
-	id = id or (callingWindow and callingWindow.id) or currentWindow
+function closeWindow(window, force)
+	window = window or callingWindow or openWindows[currentWindow]
 	
-	if not force and openWindows[id] and openWindows[id].close then
-		local status = openWindows[id].close()
+	if not force and window and window.close then
+		local status = window.close()
 		if status then
 			return status
 		end
 	end
 	
-	table.remove(openWindows, id)
+	for i, w in ipairs(openWindows) do
+		if w == window then
+			table.remove(openWindows, i)
+			break
+		end
+	end
 	
 	if #openWindows > 0 then
 		local i = #openWindows
@@ -404,7 +414,7 @@ function showWindow(id)
 	window.isActive = true
 end
 
-function hideWindow(id)
+function hideWindow()
 	if currentWindow == nil then return end
 	
 	openWindows[currentWindow].isActive = false
@@ -529,7 +539,7 @@ function shutdown(restart)
 	local refusingWindows = {}
 	for id = #openWindows, 1, -1 do
 		local window = openWindows[id]
-		local status = closeWindow(id)
+		local status = closeWindow(window)
 		if status then
 			table.insert(refusingWindows, {id=id, window=window})
 		end
@@ -544,7 +554,7 @@ function shutdown(restart)
 			{"OK", function() closeMessageBox() end},
 			{"Force Quit", function()
 				for _, w in ipairs(refusingWindows) do
-					closeWindow(w.id, true)
+					closeWindow(w, true)
 				end
 				switchScreen("screens/shutdown.lua", restart and "restart")
 			end}
@@ -830,10 +840,10 @@ function windowDec(window, id)
 	text(title, 5, -15 - f:getHeight()/2, {1, 1, 1})
 	
 	-- minimize button
-	button("", function() hideWindow(id) end, window.windowWidth - 60, -30, 30, 30, style.windowBar.minimizeButtonColor, nil, false)
+	button("", function() hideWindow() end, window.windowWidth - 60, -30, 30, 30, style.windowBar.minimizeButtonColor, nil, false)
 	
 	-- close button
-	button("", function() closeWindow(id) end, window.windowWidth - 30, -30, 30, 30, style.windowBar.closeButtonColor, nil, false)
+	button("", function() closeWindow(window) end, window.windowWidth - 30, -30, 30, 30, style.windowBar.closeButtonColor, nil, false)
 end
 
 -- MESSAGE BOX
@@ -958,6 +968,9 @@ function drawTextInputBox()
 end
 
 local cursor = style.cursor.image and love.mouse.newCursor(style.cursor.image)
+local cursorSizewe = love.mouse.getSystemCursor("sizewe")
+local cursorSizens = love.mouse.getSystemCursor("sizens")
+local cursorSizenwse = love.mouse.getSystemCursor("sizenwse")
 
 local function updateDimensions(width, height)
 	width = width or love.graphics.getWidth()
@@ -1020,29 +1033,50 @@ function callbacks.load()
 end
 
 function callbacks.mousepressed(x, y, button)
-	if not (currentMessageBox or currentTextInputBox) then
-		for id = #openWindows, 1, -1 do
-			local window = openWindows[id]
+	local curwin = currentWindow and openWindows[currentWindow]
+	local rx = curwin and x >= curwin.windowX + curwin.windowWidth and x <= curwin.windowX + curwin.windowWidth + 5
+	local ry = curwin and y >= curwin.windowY + curwin.windowHeight and y <= curwin.windowY + curwin.windowHeight + 5
 			
-			if x >= window.windowX and x <= window.windowX + window.windowWidth
-			and y >= window.windowY-30 and y <= window.windowY + window.windowHeight + 30 then
-				if currentWindow == id then
+	hasClickedCurrentWindow = curwin and (
+		(x >= curwin.windowX and x <= curwin.windowX + curwin.windowWidth
+		and y >= curwin.windowY-30 and y <= curwin.windowY + curwin.windowHeight + 30)
+	or (
+		curwin.resizable and (rx or ry)
+	))
+	
+	if not (currentMessageBox or currentTextInputBox) then
+		if not hasClickedCurrentWindow then
+			for id = #openWindows, 1, -1 do
+				local window = openWindows[id]
+				
+				if x >= window.windowX and x <= window.windowX + window.windowWidth
+				and y >= window.windowY-30 and y <= window.windowY + window.windowHeight + 30 then
+					if currentWindow == id then
+						break
+					end
+					
+					currentWindow = id
+					canClick = false
 					break
 				end
-				
-				currentWindow = id
-				canClick = false
-				break
 			end
 		end
 		
-		if currentWindow
-		and x >= openWindows[currentWindow].windowX and x <= openWindows[currentWindow].windowX + openWindows[currentWindow].windowWidth
-		and y >= openWindows[currentWindow].windowY-30 and y <= openWindows[currentWindow].windowY + openWindows[currentWindow].windowHeight + 30
-		and not openWindows[currentWindow].hideWindowDec then
+		if curwin
+		and x >= curwin.windowX and x <= curwin.windowX + curwin.windowWidth
+		and y >= curwin.windowY-30 and y <= curwin.windowY + curwin.windowHeight + 30
+		and not curwin.hideWindowDec then
 			
-			if y <= openWindows[currentWindow].windowY then
+			if y <= curwin.windowY then
 				isDragging = true
+			end
+		end
+		
+		if curwin and curwin.resizable then
+			isResizingX = rx
+			isResizingY = ry
+			if rx or ry then
+				canClick = false
 			end
 		end
 	end
@@ -1062,22 +1096,48 @@ function callbacks.mousereleased(x, y, button)
 	end
 	canClick = true
 	isDragging = false
+	isResizingX = false
+	isResizingY = false
 end
 
 function callbacks.mousemoved(x, y, dx, dy)
-	if openWindows[currentWindow] then
+	local window = openWindows[currentWindow]
+	if window then
 		if isDragging then
-			openWindows[currentWindow].windowX = openWindows[currentWindow].windowX + dx
-			openWindows[currentWindow].windowY = openWindows[currentWindow].windowY + dy
+			window.windowX = window.windowX + dx
+			window.windowY = window.windowY + dy
 			
-			if openWindows[currentWindow].windowY > displayHeight - 40 then
-				openWindows[currentWindow].windowY = openWindows[currentWindow].windowY - dy
+			if window.windowY > displayHeight - 40 then
+				window.windowY = window.windowY - dy
 			end
 		end
 		
-		if openWindows[currentWindow].mousemoved then
-			callingWindow = openWindows[currentWindow]
-			call(openWindows[currentWindow].mousemoved, x, y, dx, dy)
+		if window.resizable then
+			local rx = x >= window.windowX + window.windowWidth and x <= window.windowX + window.windowWidth + 5
+			local ry = y >= window.windowY + window.windowHeight and y <= window.windowY + window.windowHeight + 5
+			
+			if (isResizingX and isResizingY) or (rx and ry) then
+				love.mouse.setCursor(cursorSizenwse)
+			elseif isResizingX or rx then
+				love.mouse.setCursor(cursorSizewe)
+			elseif isResizingY or ry then
+				love.mouse.setCursor(cursorSizens)
+			else
+				love.mouse.setCursor(cursor)
+			end
+			
+			if isResizingX and (x - window.windowX) >= 100 then
+				window.windowWidth = x - window.windowX
+			end
+			
+			if isResizingY and (y - window.windowY) >= 100 then
+				window.windowHeight = y - window.windowY
+			end
+		end
+		
+		if window.mousemoved then
+			callingWindow = window
+			call(window.mousemoved, x, y, dx, dy)
 			callingWindow = nil
 		end
 	end
@@ -1111,7 +1171,7 @@ function callbacks.keypressed(key)
 				callingWindow = currentTextInputBox.window
 				local ok, msg = pcall(currentTextInputBox.onfinish, currentTextInputBox.input)
 				if not ok then
-					closeWindow(callingWindow.id)
+					closeWindow(callingWindow)
 					messageBox("Program Error", msg, {{"OK", function() closeMessageBox() end}}, "critical")
 					return
 				end

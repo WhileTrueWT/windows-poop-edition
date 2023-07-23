@@ -6,6 +6,7 @@ local t
 window.windowX, window.windowY = 0, displayHeight - 40 - menuHeight
 window.windowWidth, window.windowHeight = menuWidth, menuHeight
 window.hideWindowDec = true
+window.resizable = false
 
 local items = {
 	{"Internet Explorer", "images/icons/ie.png", function() openWindow("windows/ie.exe") end},

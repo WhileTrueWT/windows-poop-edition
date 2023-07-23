@@ -55,6 +55,7 @@ function screen.draw()
 			for id, w in ipairs(openWindows) do
 				if w.file == "windows/startmenu.exe" then
 					isStartMenuOpen = true
+					showWindow(id)
 					break
 				end
 			end
