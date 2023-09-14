@@ -72,7 +72,7 @@ style.window = {}
 style.window.backgroundColor = {0.95, 0.95, 0.95}
 
 style.cursor = {}
---style.cursor.image = "images/cursor.png"
+style.cursor.image = "images/cursor.png"
 
 style.font = "fonts/DejaVuSans.ttf"
 
@@ -967,7 +967,7 @@ function drawTextInputBox()
 	end
 end
 
-local cursor = style.cursor.image and love.mouse.newCursor(style.cursor.image)
+local cursor = (love.system.getOS() ~= "Windows") and style.cursor.image and love.mouse.newCursor(style.cursor.image) or love.mouse.getSystemCursor("arrow")
 local cursorSizewe = love.mouse.getSystemCursor("sizewe")
 local cursorSizens = love.mouse.getSystemCursor("sizens")
 local cursorSizenwse = love.mouse.getSystemCursor("sizenwse")
