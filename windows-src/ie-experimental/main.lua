@@ -44,12 +44,14 @@ function goToPage(id, arg)
 		
 		if legacyCurrentPage and legacyCurrentPage.load then legacyCurrentPage.load(arg) end
 		
-	else
+	elseif isActualInternetSupported then
 		isRequesting = true
 		currentPage = nil
 		legacyCurrentPage = nil
 		
 		requestThread:start(page)
+	else
+		messageBox("Internet Explorer", "Access to websites on the real internet is currently only supported on Linux host machines.", nil, "exc")
 	end
 end
 
@@ -124,17 +126,14 @@ end
 
 function window.load()
 	if love.system.getOS() ~= "Linux" then
-		programCantStart = true
-		messageBox("Error", "This program currently only works on a Linux host.", {{"OK", function()
-			closeMessageBox()
-			closeWindow()
-		end}})
-		return
-	end
+		isActualInternetSupported = false
+	else
+		isActualInternetSupported = true
 	
-	love.filesystem.setCRequirePath("lib/?.so")
-	https = require "https"
-	love.filesystem.setCRequirePath("??")
+		love.filesystem.setCRequirePath("lib/?.so")
+		https = require "https"
+		love.filesystem.setCRequirePath("??")
+	end
 	
 	domParse = loadLocalScript("domParse.lua")()
 	
