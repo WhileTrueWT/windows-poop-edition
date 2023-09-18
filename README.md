@@ -1,7 +1,7 @@
 # Windows Poop Edition
 A semi-parodical operating system simulator, created with LÖVE
 
-Contributions welcome, assuming you can put up with a very messy and hacky codebase which still contains remnants of the Windows PE 2.0 days, when I knew less about programming then I do know.
+**NOTE: This repository is abandoned for the time being.** Development of the project itself will continue, but without any interaction with this Git repository. I am certain this comes off as an abhorrent and baffling decision to everyone ever, but trying to figure out Git has completely killed my motivation to work on this project. The mere thought of trying to decipher Git, unconditonally to my mental state or irritability levels, brings me more frustation than the thought of trying to learn other things. I am not sure why this is, but my brain being an enigma is nothing new to me. I will be able to develop this software in a much more enjoyable manner if all I have to worry about is writing the damn code.
 
 [itch.io page](https://viba-unu.itch.io/winpe5)
 
